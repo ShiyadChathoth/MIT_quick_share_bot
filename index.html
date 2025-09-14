@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Secure Sender</title>
+    <title>Secure Sender</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/docx@8.2.2/build/index.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -28,20 +26,19 @@
 
             <div class="space-y-4">
                 <div id="image-upload-section" class="hidden">
-                    <label for="image-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image File (optional)</label>
+                    <label for="image-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image for PDF (optional)</label>
                     <input type="file" id="image-input" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                     <img id="image-preview" class="mt-4 rounded-lg max-h-48 hidden" />
                 </div>
                 <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Title / Heading">
-                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Content / Caption..."></textarea>
+                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Content..."></textarea>
             </div>
 
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                  <select id="action-select" class="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="sendText">Send as Text Document</option>
-                    <option value="sendImage">Send Image</option>
-                    <option value="downloadDocx">Download as DOCX</option>
-                    <option value="downloadPdf">Download as PDF</option>
+                    <option value="sendPdf">Generate & Send PDF</option>
+                    <option value="downloadPdf">Download PDF Only</option>
                 </select>
                 <button id="main-button" class="w-full sm:w-auto flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
                     <span id="button-text">Send to Telegram</span>
@@ -70,6 +67,8 @@
     </div>
 
     <script>
+        const { jsPDF } = window.jspdf;
+
         // DOM Elements
         const editor = document.getElementById('editor');
         const headingInput = document.getElementById('heading-input');
@@ -111,23 +110,46 @@
                 updateButtonText();
             }
         }
+        
+        // --- PDF Generation Logic ---
+        function generatePdf(callback) {
+            const heading = headingInput.value.trim();
+            const content = editor.value.trim();
+            const filename = (heading || 'document') + '.pdf';
+            const imageFile = imageInput.files[0];
+
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text(heading, 14, 22);
+            doc.setFontSize(11);
+            const textLines = doc.splitTextToSize(content, 180);
+            doc.text(textLines, 14, 32);
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imgData = event.target.result;
+                    doc.addPage();
+                    doc.addImage(imgData, 'JPEG', 14, 20, 180, 120);
+                    callback(doc, filename);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                callback(doc, filename);
+            }
+        }
 
         // --- UI Update Logic ---
         function updateUIForAction(action) {
-            const showImageSection = ['sendImage', 'downloadDocx', 'downloadPdf'].includes(action);
+            const showImageSection = ['sendPdf', 'downloadPdf'].includes(action);
             imageUploadSection.classList.toggle('hidden', !showImageSection);
-            
-            headingInput.placeholder = (action === 'sendImage') ? 'Caption (optional)' : 'Title / Heading';
-            editor.placeholder = (action === 'sendImage') ? 'More caption text (optional)' : 'Content...';
             updateButtonText();
         }
 
         function updateButtonText() {
             const action = actionSelect.value;
-            if (action === 'sendText' || action === 'sendImage') {
+            if (action === 'sendText' || action === 'sendPdf') {
                 buttonText.textContent = 'Send to Telegram';
-            } else if (action === 'downloadDocx') {
-                buttonText.textContent = 'Download DOCX';
             } else if (action === 'downloadPdf') {
                 buttonText.textContent = 'Download PDF';
             }
@@ -164,7 +186,6 @@
         async function handleSendText() {
             if (!webhookUrl) {
                 showToast("Webhook URL is missing. Click the gear icon.", true);
-                openModal();
                 return;
             }
             const content = editor.value.trim();
@@ -185,151 +206,66 @@
                 });
 
                 if (response.ok) {
-                    showToast("Message sent to Telegram!");
-                    editor.value = '';
-                    headingInput.value = '';
+                    showToast("Message sent!");
+                    editor.value = ''; headingInput.value = '';
                 } else {
-                    showToast(`Error: Server responded with status ${response.status}`, true);
+                    showToast(`Error: ${response.status}`, true);
                 }
             } catch (error) {
-                showToast("Failed to send. Check console for errors.", true);
+                showToast("Failed to send. Check console.", true);
             } finally {
                 setLoading(false);
             }
-        }
-
-        async function handleSendImage() {
-            if (!webhookUrl) {
-                showToast("Webhook URL is missing. Click the gear icon.", true);
-                openModal();
-                return;
-            }
-            const imageFile = imageInput.files[0];
-            if (!imageFile) {
-                showToast("Please select an image file!", true);
-                return;
-            }
-
-            setLoading(true);
-            const caption = [headingInput.value.trim(), editor.value.trim()].filter(Boolean).join('\n\n');
-            const formData = new FormData();
-            formData.append('action', 'sendImage');
-            formData.append('photo', imageFile);
-            formData.append('caption', caption);
-
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    showToast("Image sent to Telegram!");
-                    editor.value = '';
-                    headingInput.value = '';
-                    imageInput.value = null;
-                    imagePreview.classList.add('hidden');
-                } else {
-                    showToast(`Error: Server responded with status ${response.status}`, true);
-                }
-            } catch (error) {
-                showToast("Failed to send. Check console for errors.", true);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function handleDownloadDocx() {
-            const { Document, Packer, Paragraph, TextRun, ImageRun } = docx;
-            const heading = headingInput.value.trim();
-            const content = editor.value.trim();
-            const filename = (heading || 'document') + '.docx';
-            const imageFile = imageInput.files[0];
-
-            const docChildren = [
-                new Paragraph({
-                    children: [new TextRun({ text: heading, bold: true, size: 32 })],
-                    spacing: { after: 200 },
-                }),
-                ...content.split('\n').map(line => new Paragraph({ children: [new TextRun(line)] }))
-            ];
-
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const imageBuffer = reader.result;
-                    // Add a page break before the image
-                    docChildren.push(new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }));
-                    docChildren.push(new Paragraph({
-                        children: [
-                            new ImageRun({
-                                data: imageBuffer,
-                                transformation: { width: 450, height: 300 },
-                            }),
-                        ],
-                    }));
-                    createAndDownloadDocx(docChildren, filename);
-                };
-                reader.readAsArrayBuffer(imageFile);
-            } else {
-                createAndDownloadDocx(docChildren, filename);
-            }
-        }
-
-        function createAndDownloadDocx(children, filename) {
-            const { Document, Packer } = docx;
-            const doc = new Document({ sections: [{ children }] });
-            Packer.toBlob(doc).then(blob => {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
         }
         
         function handleDownloadPdf() {
-            const { jsPDF } = window.jspdf;
-            const heading = headingInput.value.trim();
-            const content = editor.value.trim();
-            const filename = (heading || 'document') + '.pdf';
-            const imageFile = imageInput.files[0];
-
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text(heading, 14, 22);
-            doc.setFontSize(11);
-            const textLines = doc.splitTextToSize(content, 180);
-            doc.text(textLines, 14, 32);
-
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const imgData = event.target.result;
-                    const imgProps = doc.getImageProperties(imgData);
-                    const pdfWidth = doc.internal.pageSize.getWidth();
-                    const aspect = imgProps.height / imgProps.width;
-                    const imgWidth = pdfWidth - 28;
-                    const imgHeight = imgWidth * aspect;
-                    
-                    // Always add a new page for the image
-                    doc.addPage();
-                    doc.addImage(imgData, 'JPEG', 14, 20, imgWidth, imgHeight);
-                    doc.save(filename);
-                };
-                reader.readAsDataURL(imageFile);
-            } else {
+            generatePdf((doc, filename) => {
                 doc.save(filename);
+            });
+        }
+
+        function handleSendPdf() {
+            if (!webhookUrl) {
+                showToast("Webhook URL is missing. Click the gear icon.", true);
+                return;
             }
+            setLoading(true, "Generating PDF...");
+            
+            generatePdf(async (doc, filename) => {
+                setLoading(true, "Sending PDF...");
+                const pdfBlob = doc.output('blob');
+                const caption = headingInput.value.trim();
+                
+                const formData = new FormData();
+                formData.append('document', pdfBlob, filename);
+                formData.append('caption', caption);
+
+                try {
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        showToast("PDF sent to Telegram!");
+                        editor.value = ''; headingInput.value = '';
+                        imageInput.value = null; imagePreview.classList.add('hidden');
+                    } else {
+                        showToast(`Error: ${response.status}`, true);
+                    }
+                } catch (error) {
+                    showToast("Failed to send. Check console.", true);
+                } finally {
+                    setLoading(false);
+                }
+            });
         }
 
         // --- Event Listeners ---
         mainButton.addEventListener('click', () => {
             const action = actionSelect.value;
             if (action === 'sendText') handleSendText();
-            else if (action === 'sendImage') handleSendImage();
-            else if (action === 'downloadDocx') handleDownloadDocx();
+            else if (action === 'sendPdf') handleSendPdf();
             else if (action === 'downloadPdf') handleDownloadPdf();
         });
 
@@ -348,10 +284,6 @@
         settingsButton.addEventListener('click', openModal);
         closeModalButton.addEventListener('click', closeModal);
         saveSettingsButton.addEventListener('click', saveSettings);
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) closeModal();
-        });
-
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             updateUIForAction(actionSelect.value);
