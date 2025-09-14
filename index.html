@@ -258,6 +258,8 @@
                 const reader = new FileReader();
                 reader.onload = () => {
                     const imageBuffer = reader.result;
+                    // Add a page break before the image
+                    docChildren.push(new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }));
                     docChildren.push(new Paragraph({
                         children: [
                             new ImageRun({
@@ -300,7 +302,6 @@
             doc.setFontSize(11);
             const textLines = doc.splitTextToSize(content, 180);
             doc.text(textLines, 14, 32);
-            let lastTextY = 32 + (textLines.length * 5);
 
             if (imageFile) {
                 const reader = new FileReader();
@@ -312,13 +313,9 @@
                     const imgWidth = pdfWidth - 28;
                     const imgHeight = imgWidth * aspect;
                     
-                    if (lastTextY + imgHeight + 10 > doc.internal.pageSize.getHeight()) {
-                        doc.addPage();
-                        lastTextY = 20; 
-                    } else {
-                        lastTextY += 10;
-                    }
-                    doc.addImage(imgData, 'JPEG', 14, lastTextY, imgWidth, imgHeight);
+                    // Always add a new page for the image
+                    doc.addPage();
+                    doc.addImage(imgData, 'JPEG', 14, 20, imgWidth, imgHeight);
                     doc.save(filename);
                 };
                 reader.readAsDataURL(imageFile);
