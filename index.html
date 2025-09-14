@@ -23,7 +23,10 @@
                 </button>
             </div>
 
-            <textarea id="editor" class="w-full h-72 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here and send it directly to your Telegram group..."></textarea>
+            <div class="space-y-4">
+                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Optional Heading...">
+                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here and send it directly to your Telegram group..."></textarea>
+            </div>
 
             <button id="send-button" class="mt-6 w-full flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -32,13 +35,12 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Make.com webhook URL is saved securely in your browser.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Pipedream webhook URL is saved securely in your browser.</p>
             <div>
-                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Make.com Webhook URL</label>
+                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pipedream Webhook URL</label>
                 <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>
             <div class="mt-6 flex justify-end space-x-3">
@@ -48,13 +50,13 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 dark:bg-gray-200 text-white dark:text-gray-900 text-sm font-semibold py-3 px-5 rounded-lg shadow-lg opacity-0 transform translate-y-2">
         <span id="toast-message"></span>
     </div>
 
     <script>
         const editor = document.getElementById('editor');
+        const headingInput = document.getElementById('heading-input');
         const sendButton = document.getElementById('send-button');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
@@ -114,6 +116,8 @@
 
         async function sendViaWebhook() {
             const messageText = editor.value.trim();
+            const headingText = headingInput.value.trim();
+
             if (!messageText) {
                 showToast("Text is empty!", true);
                 return;
@@ -130,16 +134,17 @@
             sendButton.innerHTML = 'Sending...';
 
             try {
-                // IMPORTANT: The payload key MUST be "text" to match the setup in Make.com
+                // The payload keys are "heading" and "content" to match the Pipedream component
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: messageText })
+                    body: JSON.stringify({ heading: headingText, content: messageText })
                 });
 
                 if (response.ok) {
                     showToast("Message sent to Telegram!");
                     editor.value = '';
+                    headingInput.value = '';
                 } else {
                     showToast(`Error: Server responded with status ${response.status}`, true);
                 }
