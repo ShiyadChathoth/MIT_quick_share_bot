@@ -24,8 +24,8 @@
             </div>
 
             <div class="space-y-4">
-                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Optional Heading...">
-                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here and send it directly to your Telegram group..."></textarea>
+                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Optional Heading (used as filename)">
+                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here..."></textarea>
             </div>
 
             <button id="send-button" class="mt-6 w-full flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
@@ -133,12 +133,19 @@
             sendButton.classList.add('opacity-50', 'cursor-not-allowed');
             sendButton.innerHTML = 'Sending...';
 
+            // Automatically generate the filename from the heading
+            let filename = headingText ? `${headingText}.txt` : 'document.txt';
+
             try {
-                // The payload keys are "heading" and "content" to match the Pipedream component
+                // The payload includes the auto-generated filename
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ heading: headingText, content: messageText })
+                    body: JSON.stringify({ 
+                        heading: headingText, 
+                        content: messageText,
+                        filename: filename
+                    })
                 });
 
                 if (response.ok) {
