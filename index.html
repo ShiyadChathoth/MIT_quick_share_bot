@@ -5,47 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Secure Sender</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/docx@8.2.2/build/index.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.5.23/dist/jspdf.plugin.autotable.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         #toast { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
         #settings-modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
+        .hidden-visually { position: absolute; overflow: hidden; clip: rect(0 0 0 0); height: 1px; width: 1px; margin: -1px; padding: 0; border: 0; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender for Telegram</h1>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender</h1>
                 <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
             </div>
 
             <div class="space-y-4">
-                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Optional Heading (used as filename)">
-                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here..."></textarea>
+                <div id="image-upload-section" class="hidden">
+                    <label for="image-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image File (optional)</label>
+                    <input type="file" id="image-input" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+                    <img id="image-preview" class="mt-4 rounded-lg max-h-48 hidden" />
+                </div>
+                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Title / Heading">
+                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Content / Caption..."></textarea>
             </div>
 
-            <button id="send-button" class="mt-6 w-full flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                Send to Telegram
-            </button>
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                 <select id="action-select" class="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="sendText">Send as Text Document</option>
+                    <option value="sendImage">Send Image</option>
+                    <option value="downloadDocx">Download as DOCX</option>
+                    <option value="downloadPdf">Download as PDF</option>
+                </select>
+                <button id="main-button" class="w-full sm:w-auto flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                    <span id="button-text">Send to Telegram</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Pipedream webhook URL is saved securely in your browser.</p>
-            <div>
-                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pipedream Webhook URL</label>
-                <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Pipedream webhook URLs are saved in your browser.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="text-webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Text Document Webhook URL</label>
+                    <input type="text" id="text-webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="image-webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image Webhook URL</label>
+                    <input type="text" id="image-webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                </div>
             </div>
             <div class="mt-6 flex justify-end space-x-3">
-                <button id="close-modal-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none">Cancel</button>
-                <button id="save-settings-button" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none">Save</button>
+                <button id="close-modal-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500">Cancel</button>
+                <button id="save-settings-button" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Save</button>
             </div>
         </div>
     </div>
@@ -55,20 +77,30 @@
     </div>
 
     <script>
+        // DOM Elements
         const editor = document.getElementById('editor');
         const headingInput = document.getElementById('heading-input');
-        const sendButton = document.getElementById('send-button');
+        const mainButton = document.getElementById('main-button');
+        const buttonText = document.getElementById('button-text');
+        const actionSelect = document.getElementById('action-select');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
-
+        const imageInput = document.getElementById('image-input');
+        const imageUploadSection = document.getElementById('image-upload-section');
+        const imagePreview = document.getElementById('image-preview');
+        
+        // Settings Modal Elements
         const settingsModal = document.getElementById('settings-modal');
         const settingsButton = document.getElementById('settings-button');
         const closeModalButton = document.getElementById('close-modal-button');
         const saveSettingsButton = document.getElementById('save-settings-button');
-        const webhookUrlInput = document.getElementById('webhook-url');
+        const textWebhookUrlInput = document.getElementById('text-webhook-url');
+        const imageWebhookUrlInput = document.getElementById('image-webhook-url');
 
-        let webhookUrl = '';
+        let textWebhookUrl = '';
+        let imageWebhookUrl = '';
 
+        // --- Utility Functions ---
         function showToast(message, isError = false) {
             toastMessage.textContent = message;
             toast.className = `fixed bottom-5 right-5 text-sm font-semibold py-3 px-5 rounded-lg shadow-lg opacity-0 transform translate-y-2 ${isError ? 'bg-red-600 text-white' : 'bg-gray-900 dark:bg-gray-200 text-white dark:text-gray-900'}`;
@@ -78,8 +110,42 @@
             }, 3000);
         }
 
+        function setLoading(isLoading, message = 'Sending...') {
+            mainButton.disabled = isLoading;
+            if (isLoading) {
+                mainButton.classList.add('opacity-50', 'cursor-not-allowed');
+                buttonText.textContent = message;
+            } else {
+                mainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                updateButtonText();
+            }
+        }
+
+        // --- UI Update Logic ---
+        function updateUIForAction(action) {
+            const showImageSection = ['sendImage', 'downloadDocx', 'downloadPdf'].includes(action);
+            imageUploadSection.classList.toggle('hidden', !showImageSection);
+            
+            headingInput.placeholder = (action === 'sendImage') ? 'Caption (optional)' : 'Title / Heading';
+            editor.placeholder = (action === 'sendImage') ? 'More caption text (optional)' : 'Content...';
+            updateButtonText();
+        }
+
+        function updateButtonText() {
+            const action = actionSelect.value;
+            if (action === 'sendText' || action === 'sendImage') {
+                buttonText.textContent = 'Send to Telegram';
+            } else if (action === 'downloadDocx') {
+                buttonText.textContent = 'Download DOCX';
+            } else if (action === 'downloadPdf') {
+                buttonText.textContent = 'Download PDF';
+            }
+        }
+        
+        // --- Settings Modal Logic ---
         function openModal() {
-            webhookUrlInput.value = localStorage.getItem('webhookUrl') || '';
+            textWebhookUrlInput.value = localStorage.getItem('textWebhookUrl') || '';
+            imageWebhookUrlInput.value = localStorage.getItem('imageWebhookUrl') || '';
             settingsModal.classList.remove('hidden');
             setTimeout(() => {
                 settingsModal.classList.remove('opacity-0');
@@ -94,58 +160,40 @@
         }
 
         function saveSettings() {
-            localStorage.setItem('webhookUrl', webhookUrlInput.value);
+            localStorage.setItem('textWebhookUrl', textWebhookUrlInput.value);
+            localStorage.setItem('imageWebhookUrl', imageWebhookUrlInput.value);
             loadSettings();
             showToast("Settings saved!");
             closeModal();
         }
         
         function loadSettings() {
-            webhookUrl = localStorage.getItem('webhookUrl');
-            if (!webhookUrl) {
-                showToast("Please configure your webhook URL.", true);
-            }
+            textWebhookUrl = localStorage.getItem('textWebhookUrl');
+            imageWebhookUrl = localStorage.getItem('imageWebhookUrl');
         }
         
-        settingsButton.addEventListener('click', openModal);
-        closeModalButton.addEventListener('click', closeModal);
-        saveSettingsButton.addEventListener('click', saveSettings);
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) closeModal();
-        });
-
-        async function sendViaWebhook() {
-            const messageText = editor.value.trim();
-            const headingText = headingInput.value.trim();
-
-            if (!messageText) {
-                showToast("Text is empty!", true);
-                return;
-            }
-
-            if (!webhookUrl) {
-                showToast("Webhook URL is missing. Click the gear icon.", true);
+        // --- Core Action Handlers ---
+        async function handleSendText() {
+            if (!textWebhookUrl) {
+                showToast("Text Webhook URL is missing. Click the gear icon.", true);
                 openModal();
                 return;
             }
-
-            sendButton.disabled = true;
-            sendButton.classList.add('opacity-50', 'cursor-not-allowed');
-            sendButton.innerHTML = 'Sending...';
-
-            // Automatically generate the filename from the heading
-            let filename = headingText ? `${headingText}.txt` : 'document.txt';
+            const content = editor.value.trim();
+            if (!content) {
+                showToast("Content is empty!", true);
+                return;
+            }
+            
+            setLoading(true);
+            const heading = headingInput.value.trim();
+            const filename = heading ? `${heading}.txt` : 'document.txt';
 
             try {
-                // The payload includes the auto-generated filename
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(textWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        heading: headingText, 
-                        content: messageText,
-                        filename: filename
-                    })
+                    body: JSON.stringify({ heading, content, filename })
                 });
 
                 if (response.ok) {
@@ -156,17 +204,172 @@
                     showToast(`Error: Server responded with status ${response.status}`, true);
                 }
             } catch (error) {
-                console.error("Fetch Error:", error);
                 showToast("Failed to send. Check console for errors.", true);
             } finally {
-                sendButton.disabled = false;
-                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                sendButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Send to Telegram';
+                setLoading(false);
             }
         }
+
+        async function handleSendImage() {
+            if (!imageWebhookUrl) {
+                showToast("Image Webhook URL is missing. Click the gear icon.", true);
+                openModal();
+                return;
+            }
+            const imageFile = imageInput.files[0];
+            if (!imageFile) {
+                showToast("Please select an image file!", true);
+                return;
+            }
+
+            setLoading(true);
+            const caption = [headingInput.value.trim(), editor.value.trim()].filter(Boolean).join('\n\n');
+            const formData = new FormData();
+            formData.append('photo', imageFile);
+            formData.append('caption', caption);
+
+            try {
+                const response = await fetch(imageWebhookUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showToast("Image sent to Telegram!");
+                    editor.value = '';
+                    headingInput.value = '';
+                    imageInput.value = null;
+                    imagePreview.classList.add('hidden');
+                } else {
+                    showToast(`Error: Server responded with status ${response.status}`, true);
+                }
+            } catch (error) {
+                showToast("Failed to send. Check console for errors.", true);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function handleDownloadDocx() {
+            const { Document, Packer, Paragraph, TextRun, ImageRun } = docx;
+            const heading = headingInput.value.trim();
+            const content = editor.value.trim();
+            const filename = (heading || 'document') + '.docx';
+            const imageFile = imageInput.files[0];
+
+            const docChildren = [
+                new Paragraph({
+                    children: [new TextRun({ text: heading, bold: true, size: 32 })],
+                    spacing: { after: 200 },
+                }),
+                ...content.split('\n').map(line => new Paragraph({ children: [new TextRun(line)] }))
+            ];
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const imageBuffer = reader.result;
+                    docChildren.push(new Paragraph({
+                        children: [
+                            new ImageRun({
+                                data: imageBuffer,
+                                transformation: { width: 450, height: 300 },
+                            }),
+                        ],
+                    }));
+                    createAndDownloadDocx(docChildren, filename);
+                };
+                reader.readAsArrayBuffer(imageFile);
+            } else {
+                createAndDownloadDocx(docChildren, filename);
+            }
+        }
+
+        function createAndDownloadDocx(children, filename) {
+            const { Document, Packer } = docx;
+            const doc = new Document({ sections: [{ children }] });
+            Packer.toBlob(doc).then(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
         
-        sendButton.addEventListener('click', sendViaWebhook);
-        document.addEventListener('DOMContentLoaded', loadSettings);
+        function handleDownloadPdf() {
+            const { jsPDF } = window.jspdf;
+            const heading = headingInput.value.trim();
+            const content = editor.value.trim();
+            const filename = (heading || 'document') + '.pdf';
+            const imageFile = imageInput.files[0];
+
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text(heading, 14, 22);
+            doc.setFontSize(11);
+            const textLines = doc.splitTextToSize(content, 180);
+            doc.text(textLines, 14, 32);
+            let lastTextY = 32 + (textLines.length * 5);
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imgData = event.target.result;
+                    const imgProps = doc.getImageProperties(imgData);
+                    const pdfWidth = doc.internal.pageSize.getWidth();
+                    const aspect = imgProps.height / imgProps.width;
+                    const imgWidth = pdfWidth - 28;
+                    const imgHeight = imgWidth * aspect;
+                    
+                    if (lastTextY + imgHeight + 10 > doc.internal.pageSize.getHeight()) {
+                        doc.addPage();
+                        lastTextY = 20; 
+                    } else {
+                        lastTextY += 10;
+                    }
+                    doc.addImage(imgData, 'JPEG', 14, lastTextY, imgWidth, imgHeight);
+                    doc.save(filename);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                doc.save(filename);
+            }
+        }
+
+        // --- Event Listeners ---
+        mainButton.addEventListener('click', () => {
+            const action = actionSelect.value;
+            if (action === 'sendText') handleSendText();
+            else if (action === 'sendImage') handleSendImage();
+            else if (action === 'downloadDocx') handleDownloadDocx();
+            else if (action === 'downloadPdf') handleDownloadPdf();
+        });
+
+        actionSelect.addEventListener('change', (e) => updateUIForAction(e.target.value));
+        
+        imageInput.addEventListener('change', () => {
+            const file = imageInput.files[0];
+            if (file) {
+                imagePreview.src = URL.createObjectURL(file);
+                imagePreview.classList.remove('hidden');
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        });
+
+        settingsButton.addEventListener('click', openModal);
+        closeModalButton.addEventListener('click', closeModal);
+        saveSettingsButton.addEventListener('click', saveSettings);
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) closeModal();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            updateUIForAction(actionSelect.value);
+        });
     </script>
 </body>
 </html>
