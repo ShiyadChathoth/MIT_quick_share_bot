@@ -3,38 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram File Sender</title>
+    <title>Telegram Secure Sender</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         #toast { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        #settings-modal { transition: opacity 0.3s ease-in-out; }
+        .modal-content { transition: transform 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Send File to Telegram</h1>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender for Telegram</h1>
+                <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
             </div>
 
-            <!-- NEW: Heading/Filename Input -->
-            <div class="mb-4">
-                <label for="filename" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heading (becomes filename)</label>
-                <input type="text" id="filename" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="e.g., Meeting Notes - Sept 14">
-            </div>
-
-            <!-- Main Content Area -->
-            <div>
-                <label for="editor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste the content for your .txt file here..."></textarea>
-            </div>
-
+            <textarea id="editor" class="w-full h-72 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Paste text here and send it directly to your Telegram group..."></textarea>
 
             <button id="send-button" class="mt-6 w-full flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                Send as .txt File
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Send to Telegram
             </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Make.com webhook URL is saved securely in your browser.</p>
+            <div>
+                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Make.com Webhook URL</label>
+                <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="close-modal-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none">Cancel</button>
+                <button id="save-settings-button" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none">Save</button>
+            </div>
         </div>
     </div>
 
@@ -44,14 +54,18 @@
     </div>
 
     <script>
-        // --- UPDATED JAVASCRIPT ---
-        const filenameInput = document.getElementById('filename');
         const editor = document.getElementById('editor');
         const sendButton = document.getElementById('send-button');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
 
-        let webhookUrl = localStorage.getItem('telegramWebhookUrl') || '';
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsButton = document.getElementById('settings-button');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const saveSettingsButton = document.getElementById('save-settings-button');
+        const webhookUrlInput = document.getElementById('webhook-url');
+
+        let webhookUrl = '';
 
         function showToast(message, isError = false) {
             toastMessage.textContent = message;
@@ -62,38 +76,52 @@
             }, 3000);
         }
 
-        // Feature to clear cache for easy webhook updating
-        if (new URLSearchParams(window.location.search).has('clearcache')) {
-            localStorage.removeItem('telegramWebhookUrl');
-            webhookUrl = '';
-            showToast("Cache cleared. Please configure your new webhook URL.");
-            history.pushState(null, "", window.location.pathname); // Clean URL
+        function openModal() {
+            webhookUrlInput.value = localStorage.getItem('webhookUrl') || '';
+            settingsModal.classList.remove('hidden');
+            setTimeout(() => {
+                settingsModal.classList.remove('opacity-0');
+                settingsModal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
         }
 
-        function promptForWebhookUrl() {
-            const url = prompt("Please enter your Pipedream Webhook URL:", webhookUrl);
-            if (url) {
-                webhookUrl = url;
-                localStorage.setItem('telegramWebhookUrl', url);
-                showToast("Webhook URL saved!");
+        function closeModal() {
+            settingsModal.classList.add('opacity-0');
+            settingsModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => settingsModal.classList.add('hidden'), 300);
+        }
+
+        function saveSettings() {
+            localStorage.setItem('webhookUrl', webhookUrlInput.value);
+            loadSettings();
+            showToast("Settings saved!");
+            closeModal();
+        }
+        
+        function loadSettings() {
+            webhookUrl = localStorage.getItem('webhookUrl');
+            if (!webhookUrl) {
+                showToast("Please configure your webhook URL.", true);
             }
         }
+        
+        settingsButton.addEventListener('click', openModal);
+        closeModalButton.addEventListener('click', closeModal);
+        saveSettingsButton.addEventListener('click', saveSettings);
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) closeModal();
+        });
 
         async function sendViaWebhook() {
+            const messageText = editor.value.trim();
+            if (!messageText) {
+                showToast("Text is empty!", true);
+                return;
+            }
+
             if (!webhookUrl) {
-                promptForWebhookUrl();
-                return;
-            }
-
-            const filename = filenameInput.value.trim();
-            const content = editor.value.trim();
-
-            if (!filename) {
-                showToast("Heading/filename is required!", true);
-                return;
-            }
-             if (!content) {
-                showToast("Content is empty!", true);
+                showToast("Webhook URL is missing. Click the gear icon.", true);
+                openModal();
                 return;
             }
 
@@ -102,17 +130,16 @@
             sendButton.innerHTML = 'Sending...';
 
             try {
-                // The new payload includes both filename and content
+                // IMPORTANT: The payload key MUST be "text" to match the setup in Make.com
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: filename, content: content })
+                    body: JSON.stringify({ text: messageText })
                 });
 
                 if (response.ok) {
-                    showToast("File sent to Telegram!");
+                    showToast("Message sent to Telegram!");
                     editor.value = '';
-                    filenameInput.value = '';
                 } else {
                     showToast(`Error: Server responded with status ${response.status}`, true);
                 }
@@ -122,18 +149,12 @@
             } finally {
                 sendButton.disabled = false;
                 sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                sendButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Send as .txt File';
+                sendButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Send to Telegram';
             }
         }
         
         sendButton.addEventListener('click', sendViaWebhook);
-
-        // Add settings icon back for user convenience
-        const settingsIcon = document.createElement('div');
-        settingsIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
-        settingsIcon.onclick = promptForWebhookUrl;
-        document.querySelector('.flex.justify-between.items-center').appendChild(settingsIcon);
+        document.addEventListener('DOMContentLoaded', loadSettings);
     </script>
 </body>
 </html>
-
