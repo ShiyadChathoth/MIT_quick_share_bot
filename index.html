@@ -14,7 +14,6 @@
         #toast { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
         #settings-modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
-        .hidden-visually { position: absolute; overflow: hidden; clip: rect(0 0 0 0); height: 1px; width: 1px; margin: -1px; padding: 0; border: 0; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
@@ -54,16 +53,10 @@
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your Pipedream webhook URLs are saved in your browser.</p>
-            <div class="space-y-4">
-                <div>
-                    <label for="text-webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Text Document Webhook URL</label>
-                    <input type="text" id="text-webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                </div>
-                <div>
-                    <label for="image-webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image Webhook URL</label>
-                    <input type="text" id="image-webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your single Pipedream webhook URL is saved in your browser.</p>
+            <div>
+                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pipedream Webhook URL</label>
+                <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
             </div>
             <div class="mt-6 flex justify-end space-x-3">
                 <button id="close-modal-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500">Cancel</button>
@@ -94,11 +87,9 @@
         const settingsButton = document.getElementById('settings-button');
         const closeModalButton = document.getElementById('close-modal-button');
         const saveSettingsButton = document.getElementById('save-settings-button');
-        const textWebhookUrlInput = document.getElementById('text-webhook-url');
-        const imageWebhookUrlInput = document.getElementById('image-webhook-url');
+        const webhookUrlInput = document.getElementById('webhook-url');
 
-        let textWebhookUrl = '';
-        let imageWebhookUrl = '';
+        let webhookUrl = '';
 
         // --- Utility Functions ---
         function showToast(message, isError = false) {
@@ -144,8 +135,7 @@
         
         // --- Settings Modal Logic ---
         function openModal() {
-            textWebhookUrlInput.value = localStorage.getItem('textWebhookUrl') || '';
-            imageWebhookUrlInput.value = localStorage.getItem('imageWebhookUrl') || '';
+            webhookUrlInput.value = localStorage.getItem('webhookUrl') || '';
             settingsModal.classList.remove('hidden');
             setTimeout(() => {
                 settingsModal.classList.remove('opacity-0');
@@ -160,22 +150,20 @@
         }
 
         function saveSettings() {
-            localStorage.setItem('textWebhookUrl', textWebhookUrlInput.value);
-            localStorage.setItem('imageWebhookUrl', imageWebhookUrlInput.value);
+            localStorage.setItem('webhookUrl', webhookUrlInput.value);
             loadSettings();
             showToast("Settings saved!");
             closeModal();
         }
         
         function loadSettings() {
-            textWebhookUrl = localStorage.getItem('textWebhookUrl');
-            imageWebhookUrl = localStorage.getItem('imageWebhookUrl');
+            webhookUrl = localStorage.getItem('webhookUrl');
         }
         
         // --- Core Action Handlers ---
         async function handleSendText() {
-            if (!textWebhookUrl) {
-                showToast("Text Webhook URL is missing. Click the gear icon.", true);
+            if (!webhookUrl) {
+                showToast("Webhook URL is missing. Click the gear icon.", true);
                 openModal();
                 return;
             }
@@ -190,10 +178,10 @@
             const filename = heading ? `${heading}.txt` : 'document.txt';
 
             try {
-                const response = await fetch(textWebhookUrl, {
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ heading, content, filename })
+                    body: JSON.stringify({ action: 'sendText', heading, content, filename })
                 });
 
                 if (response.ok) {
@@ -211,8 +199,8 @@
         }
 
         async function handleSendImage() {
-            if (!imageWebhookUrl) {
-                showToast("Image Webhook URL is missing. Click the gear icon.", true);
+            if (!webhookUrl) {
+                showToast("Webhook URL is missing. Click the gear icon.", true);
                 openModal();
                 return;
             }
@@ -225,11 +213,12 @@
             setLoading(true);
             const caption = [headingInput.value.trim(), editor.value.trim()].filter(Boolean).join('\n\n');
             const formData = new FormData();
+            formData.append('action', 'sendImage');
             formData.append('photo', imageFile);
             formData.append('caption', caption);
 
             try {
-                const response = await fetch(imageWebhookUrl, {
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     body: formData
                 });
