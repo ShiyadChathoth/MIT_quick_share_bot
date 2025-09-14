@@ -50,9 +50,9 @@
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your single Pipedream webhook URL is saved in your browser.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your single Make.com webhook URL is saved in your browser.</p>
             <div>
-                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pipedream Webhook URL</label>
+                <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Make.com Webhook URL</label>
                 <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
             </div>
             <div class="mt-6 flex justify-end space-x-3">
@@ -119,18 +119,35 @@
             const imageFile = imageInput.files[0];
 
             const doc = new jsPDF();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const pageMargin = 14;
+
             doc.setFontSize(18);
-            doc.text(heading, 14, 22);
+            doc.text(heading, pageMargin, 22);
             doc.setFontSize(11);
-            const textLines = doc.splitTextToSize(content, 180);
-            doc.text(textLines, 14, 32);
+            
+            const textLines = doc.splitTextToSize(content, doc.internal.pageSize.getWidth() - (pageMargin * 2));
+            doc.text(textLines, pageMargin, 32);
+
+            let lastY = 32 + (textLines.length * (doc.getLineHeight() / doc.internal.scaleFactor));
 
             if (imageFile) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const imgData = event.target.result;
-                    doc.addPage();
-                    doc.addImage(imgData, 'JPEG', 14, 20, 180, 120);
+                    const imgProps = doc.getImageProperties(imgData);
+                    const imgHeight = (imgProps.height * 180) / imgProps.width; // Maintain aspect ratio for a width of 180
+                    const spaceNeeded = imgHeight + 10; // Image height + margin
+                    
+                    let imageY = lastY + 10;
+
+                    // Check if there is enough space on the current page
+                    if (lastY + spaceNeeded > pageHeight - pageMargin) {
+                        doc.addPage();
+                        imageY = pageMargin; // Start image at the top of the new page
+                    }
+                    
+                    doc.addImage(imgData, 'JPEG', pageMargin, imageY, 180, imgHeight);
                     callback(doc, filename);
                 };
                 reader.readAsDataURL(imageFile);
@@ -138,6 +155,7 @@
                 callback(doc, filename);
             }
         }
+
 
         // --- UI Update Logic ---
         function updateUIForAction(action) {
@@ -180,6 +198,10 @@
         
         function loadSettings() {
             webhookUrl = localStorage.getItem('webhookUrl');
+            if (!webhookUrl) {
+                // If no URL is set, open the settings modal automatically for the first time user.
+                openModal();
+            }
         }
         
         // --- Core Action Handlers ---
@@ -209,16 +231,24 @@
                     showToast("Message sent!");
                     editor.value = ''; headingInput.value = '';
                 } else {
-                    showToast(`Error: ${response.status}`, true);
+                    const errorData = await response.json().catch(() => ({}));
+                    showToast(`Error: ${errorData.message || response.status}`, true);
                 }
             } catch (error) {
                 showToast("Failed to send. Check console.", true);
+                console.error("Send Error:", error);
             } finally {
                 setLoading(false);
             }
         }
         
         function handleDownloadPdf() {
+            const heading = headingInput.value.trim();
+            const content = editor.value.trim();
+            if (!heading || !content) {
+                showToast("Title and content are required for PDF.", true);
+                return;
+            }
             generatePdf((doc, filename) => {
                 doc.save(filename);
             });
@@ -227,6 +257,12 @@
         function handleSendPdf() {
             if (!webhookUrl) {
                 showToast("Webhook URL is missing. Click the gear icon.", true);
+                return;
+            }
+            const heading = headingInput.value.trim();
+            const content = editor.value.trim();
+            if (!heading || !content) {
+                showToast("Title and content are required for PDF.", true);
                 return;
             }
             setLoading(true, "Generating PDF...");
@@ -251,15 +287,18 @@
                         editor.value = ''; headingInput.value = '';
                         imageInput.value = null; imagePreview.classList.add('hidden');
                     } else {
-                        showToast(`Error: ${response.status}`, true);
+                        const errorData = await response.json().catch(() => ({}));
+                        showToast(`Error: ${errorData.message || response.status}`, true);
                     }
                 } catch (error) {
                     showToast("Failed to send. Check console.", true);
+                    console.error("Send PDF Error:", error);
                 } finally {
                     setLoading(false);
                 }
             });
         }
+
 
         // --- Event Listeners ---
         mainButton.addEventListener('click', () => {
