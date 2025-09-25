@@ -12,10 +12,11 @@
         #toast { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
         #settings-modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
+        .section { transition: opacity 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-xl mx-auto">
+    <div class="w-full max-w-2xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender</h1>
@@ -25,18 +26,22 @@
             </div>
 
             <div class="space-y-4">
-                <div id="image-upload-section" class="hidden">
-                    <label for="image-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image for PDF (optional)</label>
-                    <input type="file" id="image-input" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
-                    <img id="image-preview" class="mt-4 rounded-lg max-h-48 hidden" />
-                </div>
-                <input type="text" id="heading-input" class="w-full p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Title / Heading">
-                <textarea id="editor" class="w-full h-64 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Content..."></textarea>
+                 <input type="text" id="heading-input" class="w-full p-3 text-lg font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Main Document Title">
+                 <div id="main-image-container" class="image-container"></div>
+                 <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
+
+                <div id="sections-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700">
+                    </div>
+
+                <button id="add-section-button" type="button" class="w-full flex items-center justify-center gap-2 mt-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-gray-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Paragraph Section
+                </button>
             </div>
 
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                  <select id="action-select" class="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="sendText">Send as Text Document</option>
+                    <option value="sendText">Send as Text</option>
                     <option value="sendPdf">Generate & Send PDF</option>
                     <option value="downloadPdf">Download PDF Only</option>
                 </select>
@@ -70,16 +75,14 @@
         const { jsPDF } = window.jspdf;
 
         // DOM Elements
-        const editor = document.getElementById('editor');
         const headingInput = document.getElementById('heading-input');
         const mainButton = document.getElementById('main-button');
         const buttonText = document.getElementById('button-text');
         const actionSelect = document.getElementById('action-select');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
-        const imageInput = document.getElementById('image-input');
-        const imageUploadSection = document.getElementById('image-upload-section');
-        const imagePreview = document.getElementById('image-preview');
+        const sectionsContainer = document.getElementById('sections-container');
+        const addSectionButton = document.getElementById('add-section-button');
         
         // Settings Modal Elements
         const settingsModal = document.getElementById('settings-modal');
@@ -111,59 +114,139 @@
             }
         }
         
-        // --- PDF Generation Logic ---
-        function generatePdf(callback) {
-            const heading = headingInput.value.trim();
-            const content = editor.value.trim();
-            const filename = (heading || 'document') + '.pdf';
-            const imageFile = imageInput.files[0];
-
-            const doc = new jsPDF();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const pageMargin = 14;
-
-            doc.setFontSize(18);
-            doc.text(heading, pageMargin, 22);
-            doc.setFontSize(11);
+        // --- Section Management ---
+        function createNewSection(isFirst = false) {
+            const sectionId = `section-${Date.now()}`;
+            const sectionDiv = document.createElement('div');
+            sectionDiv.id = sectionId;
+            sectionDiv.className = 'section space-y-3 p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 relative';
             
-            const textLines = doc.splitTextToSize(content, doc.internal.pageSize.getWidth() - (pageMargin * 2));
-            doc.text(textLines, pageMargin, 32);
+            const removeButtonHTML = isFirst ? '' : `<button type="button" onclick="removeSection('${sectionId}')" class="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full hover:bg-red-600">&times;</button>`;
+            
+            sectionDiv.innerHTML = `
+                <div id="image-container-${sectionId}" class="image-container"></div>
+                <button type="button" onclick="addImage('image-container-${sectionId}')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image</button>
+                <input type="text" class="subheading-input w-full p-2 text-md font-medium text-gray-700 dark:text-gray-300 bg-transparent dark:bg-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Sub-heading (optional)">
+                <textarea class="content-textarea w-full h-24 p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md resize-y focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Paragraph content..."></textarea>
+                ${removeButtonHTML}
+            `;
+            
+            sectionsContainer.appendChild(sectionDiv);
+            sectionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
 
-            let lastY = 32 + (textLines.length * (doc.getLineHeight() / doc.internal.scaleFactor));
-
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const imgData = event.target.result;
-                    const imgProps = doc.getImageProperties(imgData);
-                    const imgHeight = (imgProps.height * 180) / imgProps.width; // Maintain aspect ratio for a width of 180
-                    const spaceNeeded = imgHeight + 10; // Image height + margin
-                    
-                    let imageY = lastY + 10;
-
-                    // Check if there is enough space on the current page
-                    if (lastY + spaceNeeded > pageHeight - pageMargin) {
-                        doc.addPage();
-                        imageY = pageMargin; // Start image at the top of the new page
-                    }
-                    
-                    doc.addImage(imgData, 'JPEG', pageMargin, imageY, 180, imgHeight);
-                    callback(doc, filename);
-                };
-                reader.readAsDataURL(imageFile);
-            } else {
-                callback(doc, filename);
+        window.removeSection = function(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.opacity = 0;
+                setTimeout(() => section.remove(), 300);
             }
         }
 
+        window.addImage = function(containerId) {
+            const imageContainer = document.getElementById(containerId);
+            const parent = imageContainer.parentNode;
+            const addButton = parent.querySelector('.add-image-button');
 
-        // --- UI Update Logic ---
-        function updateUIForAction(action) {
-            const showImageSection = ['sendPdf', 'downloadPdf'].includes(action);
-            imageUploadSection.classList.toggle('hidden', !showImageSection);
-            updateButtonText();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.className = 'hidden';
+            input.onchange = () => {
+                const file = input.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imageContainer.innerHTML = `<img src="${e.target.result}" class="image-preview mt-2 rounded-lg max-h-48 mx-auto" />`;
+                        addButton.textContent = 'Change Image';
+                    };
+                    reader.readAsDataURL(file);
+                    imageContainer.file = file;
+                }
+            };
+            input.click();
+        }
+        
+        // --- PDF Generation Logic ---
+        async function generatePdf(callback) {
+            const mainTitle = headingInput.value.trim();
+            const filename = (mainTitle || 'document') + '.pdf';
+            
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            let y = margin;
+
+            // Helper function to add image to PDF
+            const addImageToPdf = async (file, currentY) => {
+                const imgData = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                try {
+                    const imgProps = doc.getImageProperties(imgData);
+                    const imgWidth = pageWidth - (margin * 2);
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                    if (currentY + imgHeight > pageHeight - margin) { doc.addPage(); currentY = margin; }
+                    doc.addImage(imgData, imgProps.fileType, margin, currentY, imgWidth, imgHeight);
+                    return currentY + imgHeight + 15;
+                } catch (e) {
+                    console.error("Error adding image:", e);
+                    showToast(`Failed to add an image.`, true);
+                    return currentY;
+                }
+            };
+
+            // Main Title
+            if (mainTitle) {
+                doc.setFontSize(22);
+                doc.setFont('helvetica', 'bold');
+                doc.text(mainTitle, pageWidth / 2, y, { align: 'center' });
+                y += 30;
+                doc.setFont('helvetica', 'normal');
+            }
+
+            // Main Image
+            const mainImageFile = document.getElementById('main-image-container').file;
+            if(mainImageFile) y = await addImageToPdf(mainImageFile, y);
+
+
+            const sections = Array.from(document.querySelectorAll('#sections-container .section'));
+            for (const section of sections) {
+                const imageFile = section.querySelector('.image-container').file;
+                const subheading = section.querySelector('.subheading-input').value.trim();
+                const content = section.querySelector('.content-textarea').value.trim();
+
+                // Image
+                if (imageFile) y = await addImageToPdf(imageFile, y);
+
+                // Sub-heading
+                if (subheading) {
+                    if (y + 20 > pageHeight - margin) { doc.addPage(); y = margin; }
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(subheading, margin, y);
+                    y += 20;
+                    doc.setFont('helvetica', 'normal');
+                }
+
+                // Content
+                if (content) {
+                    doc.setFontSize(11);
+                    const textLines = doc.splitTextToSize(content, pageWidth - (margin * 2));
+                    const textHeight = textLines.length * (doc.getLineHeight() / doc.internal.scaleFactor);
+                    if (y + textHeight > pageHeight - margin) { doc.addPage(); y = margin; }
+                    doc.text(textLines, margin, y);
+                    y += textHeight + 15;
+                }
+            }
+            callback(doc, filename);
         }
 
+        // --- UI Update Logic ---
         function updateButtonText() {
             const action = actionSelect.value;
             if (action === 'sendText' || action === 'sendPdf') {
@@ -190,46 +273,50 @@
         }
 
         function saveSettings() {
-            localStorage.setItem('webhookUrl', webhookUrlInput.value);
-            loadSettings();
+            webhookUrl = webhookUrlInput.value.trim();
+            localStorage.setItem('webhookUrl', webhookUrl);
             showToast("Settings saved!");
             closeModal();
         }
         
         function loadSettings() {
             webhookUrl = localStorage.getItem('webhookUrl');
-            if (!webhookUrl) {
-                // If no URL is set, open the settings modal automatically for the first time user.
-                openModal();
-            }
+            if (!webhookUrl) openModal();
         }
         
         // --- Core Action Handlers ---
+        function getCombinedText() {
+            let combinedContent = "";
+            const mainTitle = headingInput.value.trim();
+            if (mainTitle) combinedContent += `*${mainTitle}*\n\n`;
+
+            const sections = document.querySelectorAll('#sections-container .section');
+            sections.forEach(section => {
+                const subheading = section.querySelector('.subheading-input').value.trim();
+                const content = section.querySelector('.content-textarea').value.trim();
+                if (subheading) combinedContent += `_${subheading}_\n`;
+                if (content) combinedContent += `${content}\n\n`;
+            });
+            return combinedContent.trim();
+        }
+
         async function handleSendText() {
-            if (!webhookUrl) {
-                showToast("Webhook URL is missing. Click the gear icon.", true);
-                return;
-            }
-            const content = editor.value.trim();
-            if (!content) {
-                showToast("Content is empty!", true);
-                return;
-            }
+            if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
+            
+            const textContent = getCombinedText();
+            if (!textContent) { showToast("Content is empty!", true); return; }
             
             setLoading(true);
-            const heading = headingInput.value.trim();
-            const filename = heading ? `${heading}.txt` : 'document.txt';
-
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'sendText', heading, content, filename })
+                    body: JSON.stringify({ text: textContent, parse_mode: 'Markdown' })
                 });
 
                 if (response.ok) {
                     showToast("Message sent!");
-                    editor.value = ''; headingInput.value = '';
+                    window.location.reload(); // Easiest way to clear everything
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showToast(`Error: ${errorData.message || response.status}`, true);
@@ -243,30 +330,25 @@
         }
         
         function handleDownloadPdf() {
-            const heading = headingInput.value.trim();
-            const content = editor.value.trim();
-            if (!heading || !content) {
-                showToast("Title and content are required for PDF.", true);
-                return;
-            }
+            const mainTitle = headingInput.value.trim();
+            const hasContent = !!document.querySelector('.content-textarea')?.value.trim();
+            if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
+            
+            setLoading(true, "Generating...");
             generatePdf((doc, filename) => {
                 doc.save(filename);
+                setLoading(false);
             });
         }
 
         function handleSendPdf() {
-            if (!webhookUrl) {
-                showToast("Webhook URL is missing. Click the gear icon.", true);
-                return;
-            }
-            const heading = headingInput.value.trim();
-            const content = editor.value.trim();
-            if (!heading || !content) {
-                showToast("Title and content are required for PDF.", true);
-                return;
-            }
+            if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
+
+            const mainTitle = headingInput.value.trim();
+            const hasContent = !!document.querySelector('.content-textarea')?.value.trim();
+            if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
+
             setLoading(true, "Generating PDF...");
-            
             generatePdf(async (doc, filename) => {
                 setLoading(true, "Sending PDF...");
                 const pdfBlob = doc.output('blob');
@@ -274,18 +356,13 @@
                 
                 const formData = new FormData();
                 formData.append('document', pdfBlob, filename);
-                formData.append('caption', caption);
+                if (caption) formData.append('caption', caption);
 
                 try {
-                    const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        body: formData
-                    });
-
+                    const response = await fetch(webhookUrl, { method: 'POST', body: formData });
                     if (response.ok) {
                         showToast("PDF sent to Telegram!");
-                        editor.value = ''; headingInput.value = '';
-                        imageInput.value = null; imagePreview.classList.add('hidden');
+                        window.location.reload(); // Easiest way to clear everything
                     } else {
                         const errorData = await response.json().catch(() => ({}));
                         showToast(`Error: ${errorData.message || response.status}`, true);
@@ -299,7 +376,6 @@
             });
         }
 
-
         // --- Event Listeners ---
         mainButton.addEventListener('click', () => {
             const action = actionSelect.value;
@@ -308,24 +384,16 @@
             else if (action === 'downloadPdf') handleDownloadPdf();
         });
 
-        actionSelect.addEventListener('change', (e) => updateUIForAction(e.target.value));
+        addSectionButton.addEventListener('click', () => createNewSection(false));
         
-        imageInput.addEventListener('change', () => {
-            const file = imageInput.files[0];
-            if (file) {
-                imagePreview.src = URL.createObjectURL(file);
-                imagePreview.classList.remove('hidden');
-            } else {
-                imagePreview.classList.add('hidden');
-            }
-        });
-
         settingsButton.addEventListener('click', openModal);
         closeModalButton.addEventListener('click', closeModal);
         saveSettingsButton.addEventListener('click', saveSettings);
+
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
-            updateUIForAction(actionSelect.value);
+            updateButtonText();
+            createNewSection(true); // Start with one initial, non-removable section
         });
     </script>
 </body>
