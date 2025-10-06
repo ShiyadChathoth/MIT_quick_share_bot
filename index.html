@@ -17,17 +17,19 @@
 
         /* --- Text Editor Styles --- */
         .text-editor-textarea {
-            font-family: 'Fira Code', monospace; /* Use a monospaced font */
-            white-space: pre; /* Preserve whitespace and line breaks */
-            overflow-wrap: normal; /* Prevent wrapping long lines */
-            overflow-x: auto; /* Allow horizontal scrolling */
+            font-family: 'Fira Code', monospace;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
             line-height: 1.5;
+            -moz-tab-size: 4;
+            tab-size: 4;
         }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-2xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md-p-8">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender</h1>
                 <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
@@ -246,8 +248,8 @@
 
                 // Content
                 if (content) {
-                    doc.setFont('Courier', 'normal');
-                    doc.setFontSize(10);
+                    doc.setFont('Courier', 'bold');
+                    doc.setFontSize(12);
                     
                     const TAB_SPACES = '    '; // 4 spaces for a tab
                     const originalLines = content.split('\n');
@@ -339,7 +341,7 @@
             const sections = document.querySelectorAll('#sections-container .section');
             sections.forEach(section => {
                 const subheading = section.querySelector('.subheading-input').value.trim();
-                const content = section.querySelector('.content-textarea').value.trim();
+                const content = section.querySelector('.content-textarea').value;
                 if (subheading) {
                     combinedContent += forMarkdown ? `_${subheading}_\n` : `${subheading}\n`;
                 }
@@ -347,7 +349,7 @@
                     combinedContent += `${content}\n\n`;
                 }
             });
-            return combinedContent.trim();
+            return combinedContent.trimEnd();
         }
 
         async function handleSendText() {
@@ -485,6 +487,33 @@
         settingsButton.addEventListener('click', openModal);
         closeModalButton.addEventListener('click', closeModal);
         saveSettingsButton.addEventListener('click', saveSettings);
+        
+        // --- NEW: Paste Handler to convert tabs to spaces ---
+        sectionsContainer.addEventListener('paste', (e) => {
+            // Check if the paste event is happening on our target textarea
+            if (e.target.classList.contains('content-textarea')) {
+                // Get the text from the clipboard
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                
+                // Replace all tab characters with 4 spaces
+                const formattedText = pastedText.replaceAll('\t', '    ');
+
+                // Prevent the default paste action
+                e.preventDefault();
+                
+                // Get a reference to the textarea
+                const textarea = e.target;
+                
+                // Insert the modified text at the current cursor position
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+                
+                // Move the cursor to the end of the pasted content
+                textarea.selectionStart = textarea.selectionEnd = start + formattedText.length;
+            }
+        });
+
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
