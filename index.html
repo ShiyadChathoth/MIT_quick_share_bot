@@ -232,6 +232,22 @@
             };
         };
 
+        const expandTabs = (line, tabSize) => {
+            let expandedLine = '';
+            let column = 0;
+            for (const char of line) {
+                if (char === '\t') {
+                    const spacesToAdd = tabSize - (column % tabSize);
+                    expandedLine += ' '.repeat(spacesToAdd);
+                    column += spacesToAdd;
+                } else {
+                    expandedLine += char;
+                    column++;
+                }
+            }
+            return expandedLine;
+        };
+
         // --- PDF & Preview ---
         const generatePdf = (callback) => {
              (async () => {
@@ -243,9 +259,13 @@
                 let y = margin;
 
                 const getPdfFontName = (cssFont) => {
-                    if (cssFont.includes('Roboto') || cssFont.includes('Inter') || cssFont.includes('Arial')) return 'Helvetica';
-                    if (cssFont.includes('Times New Roman') || cssFont.includes('Georgia')) return 'Times';
-                    return 'Courier';
+                    if (cssFont.includes('monospace') || cssFont.includes('Courier') || cssFont.includes('Fira Code')) {
+                        return 'Courier';
+                    }
+                    if (cssFont.includes('Times New Roman') || cssFont.includes('Georgia')) {
+                        return 'Times';
+                    }
+                    return 'Helvetica';
                 };
 
                 const addImageToPdf = async (file, currentY) => {
@@ -300,9 +320,8 @@
                         const tabSize = parseInt(localStorage.getItem('tabSize') || '4', 10);
                         doc.setFont(getPdfFontName(font), 'normal');
                         doc.setFontSize(size);
-                        const tabSpaces = ' '.repeat(tabSize);
                         content.split('\n').forEach(line => {
-                            const formattedLine = line.replaceAll('\t', tabSpaces);
+                            const formattedLine = expandTabs(line, tabSize);
                             doc.splitTextToSize(formattedLine, pageWidth - (margin * 2)).forEach(textLine => {
                                 const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
                                 if (y + lineHeight > pageHeight - margin) { doc.addPage(); y = margin; }
