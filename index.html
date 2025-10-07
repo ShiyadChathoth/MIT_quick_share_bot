@@ -356,6 +356,8 @@
             if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
 
             const heading = headingInput.value.trim();
+            const filename = heading ? `${heading}.txt` : 'document.txt';
+
             let content = "";
 
             const sections = document.querySelectorAll('#sections-container .section');
