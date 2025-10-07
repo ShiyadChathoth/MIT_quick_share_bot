@@ -6,19 +6,14 @@
     <title>Secure Sender</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Arial&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Courier+New&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Georgia&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fira+Code&family=Arial&family=Courier+New&family=Georgia&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Times+New+Roman&family=Verdana&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         #toast, #settings-modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
         .section { transition: opacity 0.3s ease-in-out; }
-
         .text-editor-textarea {
             white-space: pre;
             overflow-wrap: normal;
@@ -41,73 +36,60 @@
                         </button>
                     </div>
 
-                    <div class="border-t border-b dark:border-gray-700 py-3 mb-4 space-y-3">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="heading-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Heading Font</label>
-                                <select id="heading-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                                    <option value="'Inter', sans-serif">Inter</option>
-                                    <option value="'Roboto', sans-serif">Roboto</option>
-                                    <option value="'Times New Roman', serif">Times New Roman</option>
-                                    <option value="'Georgia', serif">Georgia</option>
-                                </select>
+                    <div class="border-t border-b dark:border-gray-700 py-3 mb-4 space-y-4">
+                        <div class="p-2 border rounded-lg dark:border-gray-600">
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Heading Styles</label>
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                <select id="heading-font-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="'Inter', sans-serif">Inter</option><option value="'Roboto', sans-serif">Roboto</option><option value="'Times New Roman', serif">Times New Roman</option><option value="'Georgia', serif">Georgia</option><option value="'Verdana', sans-serif">Verdana</option></select>
+                                <select id="heading-font-size-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option>22px</option><option selected>26px</option><option>30px</option><option>36px</option></select>
+                                <select id="heading-font-weight-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal">Normal</option><option value="bold" selected>Bold</option></select>
+                                <select id="heading-font-style-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal">Normal</option><option value="italic">Italic</option></select>
                             </div>
-                            <div>
-                                <label for="heading-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Heading Size</label>
-                                <select id="heading-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                                    <option>22px</option>
-                                    <option selected>26px</option>
-                                    <option>30px</option>
-                                    <option>36px</option>
-                                </select>
+                             <div class="flex items-center mt-2">
+                                <input type="checkbox" id="heading-underline-checkbox" class="style-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                <label for="heading-underline-checkbox" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Underline</label>
                             </div>
                         </div>
-                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="subheading-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Subheading Font</label>
-                                <select id="subheading-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                                    <option value="'Inter', sans-serif">Inter</option>
-                                    <option value="'Roboto', sans-serif">Roboto</option>
-                                    <option value="'Times New Roman', serif">Times New Roman</option>
-                                    <option value="'Georgia', serif">Georgia</option>
-                                </select>
+                        <div class="p-2 border rounded-lg dark:border-gray-600">
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Subheading Styles</label>
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                <select id="subheading-font-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="'Inter', sans-serif">Inter</option><option value="'Roboto', sans-serif">Roboto</option><option value="'Times New Roman', serif">Times New Roman</option><option value="'Georgia', serif">Georgia</option><option value="'Verdana', sans-serif">Verdana</option></select>
+                                <select id="subheading-font-size-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option>16px</option><option selected>18px</option><option>20px</option><option>22px</option></select>
+                                <select id="subheading-font-weight-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal">Normal</option><option value="bold" selected>Bold</option></select>
+                                <select id="subheading-font-style-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal">Normal</option><option value="italic">Italic</option></select>
                             </div>
-                            <div>
-                                <label for="subheading-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Subheading Size</label>
-                                <select id="subheading-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                                    <option>16px</option>
-                                    <option selected>18px</option>
-                                    <option>20px</option>
-                                    <option>22px</option>
-                                </select>
+                            <div class="flex items-center mt-2">
+                                <input type="checkbox" id="subheading-underline-checkbox" class="style-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                <label for="subheading-underline-checkbox" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Underline</label>
                             </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="col-span-1">
-                                <label for="paragraph-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Paragraph Font</label>
-                                <select id="paragraph-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                        <div class="p-2 border rounded-lg dark:border-gray-600">
+                             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Paragraph Styles</label>
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                <select id="paragraph-font-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
                                     <option value="'Fira Code', monospace">Fira Code</option>
                                     <option value="'Courier New', monospace">Courier New</option>
                                     <option value="'Arial', sans-serif">Arial</option>
                                     <option value="'Georgia', serif">Georgia</option>
+                                    <option value="'Verdana', sans-serif">Verdana</option>
+                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
                                 </select>
+                                <select id="paragraph-font-size-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option>12px</option><option selected>14px</option><option>16px</option><option>18px</option></select>
+                                <select id="paragraph-font-weight-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal" selected>Normal</option><option value="bold">Bold</option></select>
+                                <select id="paragraph-font-style-select" class="style-select w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm"><option value="normal" selected>Normal</option><option value="italic">Italic</option></select>
                             </div>
-                            <div>
-                                <label for="paragraph-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Paragraph Size</label>
-                                <select id="paragraph-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
-                                    <option>12px</option>
-                                    <option selected>14px</option>
-                                    <option>16px</option>
-                                    <option>18px</option>
-                                </select>
-                            </div>
-                            <div>
+                             <div class="mt-2">
                                 <label for="tab-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Tab Size</label>
-                                <select id="tab-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                <select id="tab-size-select" class="style-select mt-1 block w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
                                     <option value="2">2 Spaces</option>
                                     <option value="4" selected>4 Spaces</option>
                                     <option value="6">6 Spaces</option>
                                     <option value="8">8 Spaces</option>
+                                    <option value="10">10 Spaces</option>
+                                    <option value="12">12 Spaces</option>
+                                    <option value="14">14 Spaces</option>
+                                    <option value="16">16 Spaces</option>
                                 </select>
                             </div>
                         </div>
@@ -117,7 +99,7 @@
                         <input type="text" id="heading-input" class="w-full p-3 font-semibold bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Main Document Title">
                         <div id="main-image-container" class="image-container"></div>
                         <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
-                        <div id="sections-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700"></div>
+                        <div id="sections-container" class="space-y-4 max-h-[40vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700"></div>
                         <div class="flex items-center gap-2 mt-2">
                             <button id="add-section-button" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-gray-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -191,9 +173,9 @@
         const clearContentButton = document.getElementById('clear-content-button');
         const livePreviewIframe = document.getElementById('live-preview-iframe');
         const styleSelects = document.querySelectorAll('.style-select');
+        const styleCheckboxes = document.querySelectorAll('.style-checkbox');
         const mainImageContainer = document.getElementById('main-image-container');
-        const tabSizeSelect = document.getElementById('tab-size-select');
-
+        
         // Settings Modal Elements
         const settingsModal = document.getElementById('settings-modal');
         const settingsButton = document.getElementById('settings-button');
@@ -259,13 +241,16 @@
                 let y = margin;
 
                 const getPdfFontName = (cssFont) => {
-                    if (cssFont.includes('monospace') || cssFont.includes('Courier') || cssFont.includes('Fira Code')) {
-                        return 'Courier';
-                    }
-                    if (cssFont.includes('Times New Roman') || cssFont.includes('Georgia')) {
-                        return 'Times';
-                    }
+                    if (cssFont.includes('monospace') || cssFont.includes('Courier') || cssFont.includes('Fira Code')) return 'Courier';
+                    if (cssFont.includes('Times New Roman') || cssFont.includes('Georgia')) return 'Times';
                     return 'Helvetica';
+                };
+
+                const getPdfFontStyle = (weight, style) => {
+                    if (weight === 'bold' && style === 'italic') return 'bolditalic';
+                    if (weight === 'bold') return 'bold';
+                    if (style === 'italic') return 'italic';
+                    return 'normal';
                 };
 
                 const addImageToPdf = async (file, currentY) => {
@@ -288,12 +273,20 @@
                 if (mainTitle) {
                     const font = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
                     const size = parseInt(localStorage.getItem('headingFontSize') || '26px', 10);
-                    doc.setFont(getPdfFontName(font), 'bold');
+                    const weight = localStorage.getItem('headingFontWeight') || 'bold';
+                    const style = localStorage.getItem('headingFontStyle') || 'normal';
+                    const underline = localStorage.getItem('headingUnderline') === 'true';
+                    doc.setFont(getPdfFontName(font), getPdfFontStyle(weight, style));
                     doc.setFontSize(size);
                     doc.text(mainTitle, pageWidth / 2, y, { align: 'center' });
+                    if (underline) {
+                        const textWidth = doc.getTextWidth(mainTitle);
+                        const textX = (pageWidth - textWidth) / 2;
+                        doc.setDrawColor(0);
+                        doc.line(textX, y + 2, textX + textWidth, y + 2);
+                    }
                     y += size * 1.2;
                 }
-                
                 y = await addImageToPdf(mainImageContainer.file, y);
 
                 const sections = Array.from(document.querySelectorAll('#sections-container .section'));
@@ -301,24 +294,32 @@
                     const imageFile = section.querySelector('.image-container').file;
                     const subheading = section.querySelector('.subheading-input').value.trim();
                     const content = section.querySelector('.content-textarea').value;
-                    
                     y = await addImageToPdf(imageFile, y);
 
                     if (subheading) {
                         const font = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
                         const size = parseInt(localStorage.getItem('subheadingFontSize') || '18px', 10);
+                        const weight = localStorage.getItem('subheadingFontWeight') || 'bold';
+                        const style = localStorage.getItem('subheadingFontStyle') || 'normal';
+                        const underline = localStorage.getItem('subheadingUnderline') === 'true';
                         if (y + size > pageHeight - margin) { doc.addPage(); y = margin; }
-                        doc.setFont(getPdfFontName(font), 'bold');
+                        doc.setFont(getPdfFontName(font), getPdfFontStyle(weight, style));
                         doc.setFontSize(size);
                         doc.text(subheading, margin, y);
+                        if (underline) {
+                            const textWidth = doc.getTextWidth(subheading);
+                            doc.setDrawColor(0);
+                            doc.line(margin, y + 2, margin + textWidth, y + 2);
+                        }
                         y += size * 1.2;
                     }
-
                     if (content) {
                         const font = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
                         const size = parseInt(localStorage.getItem('paragraphFontSize') || '14px', 10);
+                        const weight = localStorage.getItem('paragraphFontWeight') || 'normal';
+                        const style = localStorage.getItem('paragraphFontStyle') || 'normal';
                         const tabSize = parseInt(localStorage.getItem('tabSize') || '4', 10);
-                        doc.setFont(getPdfFontName(font), 'normal');
+                        doc.setFont(getPdfFontName(font), getPdfFontStyle(weight, style));
                         doc.setFontSize(size);
                         content.split('\n').forEach(line => {
                             const formattedLine = expandTabs(line, tabSize);
@@ -361,16 +362,24 @@
         const applyStyles = () => {
             headingInput.style.fontFamily = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
             headingInput.style.fontSize = localStorage.getItem('headingFontSize') || '26px';
+            headingInput.style.fontWeight = localStorage.getItem('headingFontWeight') || 'bold';
+            headingInput.style.fontStyle = localStorage.getItem('headingFontStyle') || 'normal';
+            headingInput.style.textDecoration = localStorage.getItem('headingUnderline') === 'true' ? 'underline' : 'none';
             
             document.querySelectorAll('.subheading-input').forEach(input => {
                 input.style.fontFamily = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
                 input.style.fontSize = localStorage.getItem('subheadingFontSize') || '18px';
+                input.style.fontWeight = localStorage.getItem('subheadingFontWeight') || 'bold';
+                input.style.fontStyle = localStorage.getItem('subheadingFontStyle') || 'normal';
+                input.style.textDecoration = localStorage.getItem('subheadingUnderline') === 'true' ? 'underline' : 'none';
             });
             
             const tabSize = localStorage.getItem('tabSize') || '4';
             document.querySelectorAll('.content-textarea').forEach(textarea => {
                 textarea.style.fontFamily = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
                 textarea.style.fontSize = localStorage.getItem('paragraphFontSize') || '14px';
+                textarea.style.fontWeight = localStorage.getItem('paragraphFontWeight') || 'normal';
+                textarea.style.fontStyle = localStorage.getItem('paragraphFontStyle') || 'normal';
                 textarea.style.tabSize = tabSize;
                 textarea.style.mozTabSize = tabSize;
             });
@@ -479,13 +488,27 @@
             webhookUrl = localStorage.getItem('webhookUrl');
             if (!webhookUrl) openSettingsModal();
             
-            document.getElementById('heading-font-select').value = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
-            document.getElementById('heading-font-size-select').value = localStorage.getItem('headingFontSize') || '26px';
-            document.getElementById('subheading-font-select').value = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
-            document.getElementById('subheading-font-size-select').value = localStorage.getItem('subheadingFontSize') || '18px';
-            document.getElementById('paragraph-font-select').value = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
-            document.getElementById('paragraph-font-size-select').value = localStorage.getItem('paragraphFontSize') || '14px';
-            tabSizeSelect.value = localStorage.getItem('tabSize') || '4';
+            const settings = {
+                'heading-font-select': 'headingFontFamily', 'heading-font-size-select': 'headingFontSize',
+                'heading-font-weight-select': 'headingFontWeight', 'heading-font-style-select': 'headingFontStyle',
+                'subheading-font-select': 'subheadingFontFamily', 'subheading-font-size-select': 'subheadingFontSize',
+                'subheading-font-weight-select': 'subheadingFontWeight', 'subheading-font-style-select': 'subheadingFontStyle',
+                'paragraph-font-select': 'paragraphFontFamily', 'paragraph-font-size-select': 'paragraphFontSize',
+                'paragraph-font-weight-select': 'paragraphFontWeight', 'paragraph-font-style-select': 'paragraphFontStyle',
+                'tab-size-select': 'tabSize'
+            };
+            const defaults = {
+                'headingFontFamily': "'Inter', sans-serif", 'headingFontSize': '26px', 'headingFontWeight': 'bold', 'headingFontStyle': 'normal',
+                'subheadingFontFamily': "'Inter', sans-serif", 'subheadingFontSize': '18px', 'subheadingFontWeight': 'bold', 'subheadingFontStyle': 'normal',
+                'paragraphFontFamily': "'Fira Code', monospace", 'paragraphFontSize': '14px', 'paragraphFontWeight': 'normal', 'paragraphFontStyle': 'normal', 'tabSize': '4'
+            };
+
+            for (const [id, key] of Object.entries(settings)) {
+                document.getElementById(id).value = localStorage.getItem(key) || defaults[key];
+            }
+
+            document.getElementById('heading-underline-checkbox').checked = localStorage.getItem('headingUnderline') === 'true';
+            document.getElementById('subheading-underline-checkbox').checked = localStorage.getItem('subheadingUnderline') === 'true';
             
             applyStyles();
         };
@@ -596,15 +619,26 @@
         styleSelects.forEach(select => {
             select.addEventListener('change', () => {
                 const keyMap = {
-                    'heading-font-select': 'headingFontFamily',
-                    'heading-font-size-select': 'headingFontSize',
-                    'subheading-font-select': 'subheadingFontFamily',
-                    'subheading-font-size-select': 'subheadingFontSize',
-                    'paragraph-font-select': 'paragraphFontFamily',
-                    'paragraph-font-size-select': 'paragraphFontSize',
+                    'heading-font-select': 'headingFontFamily', 'heading-font-size-select': 'headingFontSize',
+                    'heading-font-weight-select': 'headingFontWeight', 'heading-font-style-select': 'headingFontStyle',
+                    'subheading-font-select': 'subheadingFontFamily', 'subheading-font-size-select': 'subheadingFontSize',
+                    'subheading-font-weight-select': 'subheadingFontWeight', 'subheading-font-style-select': 'subheadingFontStyle',
+                    'paragraph-font-select': 'paragraphFontFamily', 'paragraph-font-size-select': 'paragraphFontSize',
+                    'paragraph-font-weight-select': 'paragraphFontWeight', 'paragraph-font-style-select': 'paragraphFontStyle',
                     'tab-size-select': 'tabSize'
                 };
                 localStorage.setItem(keyMap[select.id], select.value);
+                applyStyles();
+            });
+        });
+
+        styleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const keyMap = {
+                    'heading-underline-checkbox': 'headingUnderline',
+                    'subheading-underline-checkbox': 'subheadingUnderline'
+                };
+                localStorage.setItem(keyMap[checkbox.id], checkbox.checked);
                 applyStyles();
             });
         });
