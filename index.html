@@ -353,45 +353,30 @@
         }
 
         async function handleSendText() {
-            if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
-
-            const heading = headingInput.value.trim();
-            const filename = heading ? `${heading}.txt` : 'document.txt';
-
-            let content = "";
-
-            const sections = document.querySelectorAll('#sections-container .section');
-            sections.forEach(section => {
-                const subheading = section.querySelector('.subheading-input').value.trim();
-                const paragraph = section.querySelector('.content-textarea').value;
-                if (subheading) {
-                    content += `${subheading}\n`;
-                }
-                if (paragraph) {
-                    content += `${paragraph}\n\n`;
-                }
-            });
-            content = content.trimEnd();
-
-            if (!heading && !content) { 
-                showToast("Content is empty!", true); 
-                return; 
+            if (!webhookUrl) {
+                showToast("Webhook URL is missing. Click the gear icon.", true);
+                return;
+            }
+            const content = editor.value.trim();
+            if (!content) {
+                showToast("Content is empty!", true);
+                return;
             }
             
             setLoading(true);
+            const heading = headingInput.value.trim();
+            const filename = heading ? `${heading}.txt` : 'document.txt';
+
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        heading: heading, 
-                        content: content 
-                    })
+                    body: JSON.stringify({ action: 'sendText', heading, content, filename })
                 });
 
                 if (response.ok) {
                     showToast("Message sent!");
-                    window.location.reload();
+                    editor.value = ''; headingInput.value = '';
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showToast(`Error: ${errorData.message || response.status}`, true);
@@ -403,19 +388,6 @@
                 setLoading(false);
             }
         }
-        
-        function handleDownloadPdf() {
-            const mainTitle = headingInput.value.trim();
-            const hasContent = !!document.querySelector('.content-textarea')?.value.trim();
-            if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
-            
-            setLoading(true, "Generating...");
-            generatePdf((doc, filename) => {
-                doc.save(filename);
-                setLoading(false);
-            });
-        }
-        
         function handleDownloadText() {
             const textContent = getCombinedText(false); // Get plain text for the file
             if (!textContent) {
