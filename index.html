@@ -8,67 +8,159 @@
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Arial&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+New&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        #toast { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
-        #settings-modal { transition: opacity 0.3s ease-in-out; }
+        #toast, #settings-modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
         .section { transition: opacity 0.3s ease-in-out; }
 
-        /* --- Text Editor Styles --- */
         .text-editor-textarea {
-            font-family: 'Fira Code', monospace;
             white-space: pre;
             overflow-wrap: normal;
             overflow-x: auto;
             line-height: 1.5;
-            -moz-tab-size: 4;
-            tab-size: 4;
+            tab-size: 4; /* Default */
+            -moz-tab-size: 4; /* Firefox */
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-2xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md-p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Secure Sender</h1>
-                <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                </button>
-            </div>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div class="w-full max-w-7xl mx-auto p-4 lg:p-6">
+        <div class="lg:flex lg:gap-6">
+            <div class="lg:w-1/2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1 class="text-2xl font-bold">Secure Sender</h1>
+                        <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </button>
+                    </div>
 
-            <div class="space-y-4">
-                 <input type="text" id="heading-input" class="w-full p-3 text-lg font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Main Document Title">
-                 <div id="main-image-container" class="image-container"></div>
-                 <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
+                    <div class="border-t border-b dark:border-gray-700 py-3 mb-4 space-y-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="heading-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Heading Font</label>
+                                <select id="heading-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option value="'Inter', sans-serif">Inter</option>
+                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="heading-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Heading Size</label>
+                                <select id="heading-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option>22px</option>
+                                    <option selected>26px</option>
+                                    <option>30px</option>
+                                    <option>36px</option>
+                                </select>
+                            </div>
+                        </div>
+                         <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="subheading-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Subheading Font</label>
+                                <select id="subheading-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option value="'Inter', sans-serif">Inter</option>
+                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subheading-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Subheading Size</label>
+                                <select id="subheading-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option>16px</option>
+                                    <option selected>18px</option>
+                                    <option>20px</option>
+                                    <option>22px</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="col-span-1">
+                                <label for="paragraph-font-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Paragraph Font</label>
+                                <select id="paragraph-font-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option value="'Fira Code', monospace">Fira Code</option>
+                                    <option value="'Courier New', monospace">Courier New</option>
+                                    <option value="'Arial', sans-serif">Arial</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="paragraph-font-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Paragraph Size</label>
+                                <select id="paragraph-font-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option>12px</option>
+                                    <option selected>14px</option>
+                                    <option>16px</option>
+                                    <option>18px</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tab-size-select" class="block text-xs font-medium text-gray-500 dark:text-gray-400">Tab Size</label>
+                                <select id="tab-size-select" class="style-select mt-1 block w-full px-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
+                                    <option value="2">2 Spaces</option>
+                                    <option value="4" selected>4 Spaces</option>
+                                    <option value="6">6 Spaces</option>
+                                    <option value="8">8 Spaces</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                <div id="sections-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700">
+                    <div class="space-y-4">
+                        <input type="text" id="heading-input" class="w-full p-3 font-semibold bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Main Document Title">
+                        <div id="main-image-container" class="image-container"></div>
+                        <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
+                        <div id="sections-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700"></div>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button id="add-section-button" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-gray-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Section
+                            </button>
+                            <button id="clear-content-button" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-gray-700 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <select id="action-select" class="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="sendPdf">Generate & Send PDF</option>
+                            <option value="sendText">Send as Text</option>
+                            <option value="downloadPdf">Download PDF Only</option>
+                            <option value="downloadText">Download as Text</option>
+                        </select>
+                        <button id="main-button" class="w-full sm:w-auto flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                            <span id="button-text">Send to Telegram</span>
+                        </button>
+                    </div>
                 </div>
-
-                <button id="add-section-button" type="button" class="w-full flex items-center justify-center gap-2 mt-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-gray-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Add Paragraph Section
-                </button>
             </div>
 
-            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                 <select id="action-select" class="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="sendText">Send as Text</option>
-                    <option value="sendPdf">Generate & Send PDF</option>
-                    <option value="downloadPdf">Download PDF Only</option>
-                    <option value="downloadText">Download as Text</option>
-                </select>
-                <button id="main-button" class="w-full sm:w-auto flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                    <span id="button-text">Send to Telegram</span>
-                </button>
+            <div class="lg:w-1/2 mt-6 lg:mt-0">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg h-full flex flex-col">
+                    <div class="p-4 border-b dark:border-gray-700 flex items-center gap-2">
+                        <h2 class="text-lg font-bold">Live PDF Preview</h2>
+                    </div>
+                    <div class="flex-grow p-2 bg-gray-200 dark:bg-gray-900 rounded-b-2xl">
+                        <iframe id="live-preview-iframe" class="w-full h-full border-none" title="Live PDF Preview"></iframe>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
+    
     <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden opacity-0">
-        <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
+         <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Webhook Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your single Make.com webhook URL is saved in your browser.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Your webhook URL is saved in your browser.</p>
             <div>
                 <label for="webhook-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Make.com Webhook URL</label>
                 <input type="text" id="webhook-url" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm">
@@ -87,7 +179,7 @@
     <script>
         const { jsPDF } = window.jspdf;
 
-        // DOM Elements
+        // --- DOM Elements ---
         const headingInput = document.getElementById('heading-input');
         const mainButton = document.getElementById('main-button');
         const buttonText = document.getElementById('button-text');
@@ -96,27 +188,32 @@
         const toastMessage = document.getElementById('toast-message');
         const sectionsContainer = document.getElementById('sections-container');
         const addSectionButton = document.getElementById('add-section-button');
-        
+        const clearContentButton = document.getElementById('clear-content-button');
+        const livePreviewIframe = document.getElementById('live-preview-iframe');
+        const styleSelects = document.querySelectorAll('.style-select');
+        const mainImageContainer = document.getElementById('main-image-container');
+        const tabSizeSelect = document.getElementById('tab-size-select');
+
         // Settings Modal Elements
         const settingsModal = document.getElementById('settings-modal');
         const settingsButton = document.getElementById('settings-button');
         const closeModalButton = document.getElementById('close-modal-button');
         const saveSettingsButton = document.getElementById('save-settings-button');
         const webhookUrlInput = document.getElementById('webhook-url');
-
+        
         let webhookUrl = '';
 
         // --- Utility Functions ---
-        function showToast(message, isError = false) {
+        const showToast = (message, isError = false) => {
             toastMessage.textContent = message;
             toast.className = `fixed bottom-5 right-5 text-sm font-semibold py-3 px-5 rounded-lg shadow-lg opacity-0 transform translate-y-2 ${isError ? 'bg-red-600 text-white' : 'bg-gray-900 dark:bg-gray-200 text-white dark:text-gray-900'}`;
             toast.classList.remove('opacity-0', 'translate-y-2');
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
             }, 3000);
-        }
+        };
 
-        function setLoading(isLoading, message = 'Sending...') {
+        const setLoading = (isLoading, message = 'Sending...') => {
             mainButton.disabled = isLoading;
             if (isLoading) {
                 mainButton.classList.add('opacity-50', 'cursor-not-allowed');
@@ -125,42 +222,186 @@
                 mainButton.classList.remove('opacity-50', 'cursor-not-allowed');
                 updateButtonText();
             }
-        }
-        
-        // --- Section Management ---
-        function createNewSection(isFirst = false) {
+        };
+
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        };
+
+        // --- PDF & Preview ---
+        const generatePdf = (callback) => {
+             (async () => {
+                const mainTitle = headingInput.value.trim();
+                const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 40;
+                let y = margin;
+
+                const getPdfFontName = (cssFont) => {
+                    if (cssFont.includes('Roboto') || cssFont.includes('Inter') || cssFont.includes('Arial')) return 'Helvetica';
+                    if (cssFont.includes('Times New Roman') || cssFont.includes('Georgia')) return 'Times';
+                    return 'Courier';
+                };
+
+                const addImageToPdf = async (file, currentY) => {
+                    if (!file) return currentY;
+                    const imgData = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                    try {
+                        const imgProps = doc.getImageProperties(imgData);
+                        const imgWidth = pageWidth - (margin * 2);
+                        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                        if (currentY + imgHeight > pageHeight - margin) { doc.addPage(); currentY = margin; }
+                        doc.addImage(imgData, imgProps.fileType, margin, currentY, imgWidth, imgHeight);
+                        return currentY + imgHeight + 15;
+                    } catch (e) { console.error("Error adding image:", e); return currentY; }
+                };
+
+                if (mainTitle) {
+                    const font = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
+                    const size = parseInt(localStorage.getItem('headingFontSize') || '26px', 10);
+                    doc.setFont(getPdfFontName(font), 'bold');
+                    doc.setFontSize(size);
+                    doc.text(mainTitle, pageWidth / 2, y, { align: 'center' });
+                    y += size * 1.2;
+                }
+                
+                y = await addImageToPdf(mainImageContainer.file, y);
+
+                const sections = Array.from(document.querySelectorAll('#sections-container .section'));
+                for (const section of sections) {
+                    const imageFile = section.querySelector('.image-container').file;
+                    const subheading = section.querySelector('.subheading-input').value.trim();
+                    const content = section.querySelector('.content-textarea').value;
+                    
+                    y = await addImageToPdf(imageFile, y);
+
+                    if (subheading) {
+                        const font = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
+                        const size = parseInt(localStorage.getItem('subheadingFontSize') || '18px', 10);
+                        if (y + size > pageHeight - margin) { doc.addPage(); y = margin; }
+                        doc.setFont(getPdfFontName(font), 'bold');
+                        doc.setFontSize(size);
+                        doc.text(subheading, margin, y);
+                        y += size * 1.2;
+                    }
+
+                    if (content) {
+                        const font = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
+                        const size = parseInt(localStorage.getItem('paragraphFontSize') || '14px', 10);
+                        const tabSize = parseInt(localStorage.getItem('tabSize') || '4', 10);
+                        doc.setFont(getPdfFontName(font), 'normal');
+                        doc.setFontSize(size);
+                        const tabSpaces = ' '.repeat(tabSize);
+                        content.split('\n').forEach(line => {
+                            const formattedLine = line.replaceAll('\t', tabSpaces);
+                            doc.splitTextToSize(formattedLine, pageWidth - (margin * 2)).forEach(textLine => {
+                                const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
+                                if (y + lineHeight > pageHeight - margin) { doc.addPage(); y = margin; }
+                                doc.text(textLine, margin, y);
+                                y += lineHeight;
+                            });
+                        });
+                        y += 15;
+                    }
+                }
+                
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setFont('Helvetica', 'normal');
+                    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - margin / 2, { align: 'center' });
+                }
+                
+                callback(doc, (mainTitle || 'document') + '.pdf');
+            })();
+        };
+        const updatePreview = () => {
+             const mainTitle = headingInput.value.trim();
+             const hasContent = sectionsContainer.querySelector('.content-textarea')?.value.trim();
+             if (!mainTitle && !hasContent && !mainImageContainer.file && !sectionsContainer.querySelector('.image-container')?.file) {
+                livePreviewIframe.src = 'about:blank';
+                return;
+            }
+            generatePdf((doc) => {
+                livePreviewIframe.src = doc.output('datauristring');
+            });
+        };
+        const debouncedUpdatePreview = debounce(updatePreview, 500);
+
+        // --- Style & Section Management ---
+        const applyStyles = () => {
+            headingInput.style.fontFamily = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
+            headingInput.style.fontSize = localStorage.getItem('headingFontSize') || '26px';
+            
+            document.querySelectorAll('.subheading-input').forEach(input => {
+                input.style.fontFamily = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
+                input.style.fontSize = localStorage.getItem('subheadingFontSize') || '18px';
+            });
+            
+            const tabSize = localStorage.getItem('tabSize') || '4';
+            document.querySelectorAll('.content-textarea').forEach(textarea => {
+                textarea.style.fontFamily = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
+                textarea.style.fontSize = localStorage.getItem('paragraphFontSize') || '14px';
+                textarea.style.tabSize = tabSize;
+                textarea.style.mozTabSize = tabSize;
+            });
+            debouncedUpdatePreview();
+        };
+
+        const createNewSection = (isFirst = false) => {
             const sectionId = `section-${Date.now()}`;
             const sectionDiv = document.createElement('div');
             sectionDiv.id = sectionId;
             sectionDiv.className = 'section space-y-3 p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 relative';
-            
             const removeButtonHTML = isFirst ? '' : `<button type="button" onclick="removeSection('${sectionId}')" class="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full hover:bg-red-600">&times;</button>`;
-            
             sectionDiv.innerHTML = `
                 <div id="image-container-${sectionId}" class="image-container"></div>
                 <button type="button" onclick="addImage('image-container-${sectionId}')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image</button>
-                <input type="text" class="subheading-input w-full p-2 text-md font-medium text-gray-700 dark:text-gray-300 bg-transparent dark:bg-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Sub-heading (optional)">
+                <input type="text" class="subheading-input w-full p-2 font-medium text-gray-700 dark:text-gray-300 bg-transparent dark:bg-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Sub-heading (optional)">
                 <textarea class="content-textarea text-editor-textarea w-full h-32 p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Paragraph content..."></textarea>
                 ${removeButtonHTML}
             `;
-            
             sectionsContainer.appendChild(sectionDiv);
+            applyStyles();
             sectionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
+        };
 
-        window.removeSection = function(sectionId) {
+        const clearContent = () => {
+            headingInput.value = '';
+            mainImageContainer.innerHTML = '';
+            mainImageContainer.file = null;
+            document.querySelector('.add-image-button').textContent = 'Add Image Below Title';
+            sectionsContainer.innerHTML = '';
+            createNewSection(true);
+            showToast('Content cleared!');
+            updatePreview();
+        };
+
+        window.removeSection = (sectionId) => {
             const section = document.getElementById(sectionId);
-            if (section) {
+            if(section) {
                 section.style.opacity = 0;
-                setTimeout(() => section.remove(), 300);
+                setTimeout(() => {
+                    section.remove();
+                    updatePreview();
+                }, 300);
             }
-        }
+        };
 
-        window.addImage = function(containerId) {
+        window.addImage = (containerId) => {
             const imageContainer = document.getElementById(containerId);
             const parent = imageContainer.parentNode;
             const addButton = parent.querySelector('.add-image-button');
-
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -169,266 +410,145 @@
                 const file = input.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = e => {
                         imageContainer.innerHTML = `<img src="${e.target.result}" class="image-preview mt-2 rounded-lg max-h-48 mx-auto" />`;
                         addButton.textContent = 'Change Image';
+                        imageContainer.file = file;
+                        updatePreview();
                     };
                     reader.readAsDataURL(file);
-                    imageContainer.file = file;
                 }
             };
             input.click();
-        }
-        
-        // --- PDF Generation Logic ---
-        async function generatePdf(callback) {
-            const mainTitle = headingInput.value.trim();
-            const filename = (mainTitle || 'document') + '.pdf';
-            
-            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 40;
-            let y = margin;
+        };
 
-            // Helper function to add image to PDF
-            const addImageToPdf = async (file, currentY) => {
-                const imgData = await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-                try {
-                    const imgProps = doc.getImageProperties(imgData);
-                    const imgWidth = pageWidth - (margin * 2);
-                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-                    if (currentY + imgHeight > pageHeight - margin) { doc.addPage(); currentY = margin; }
-                    doc.addImage(imgData, imgProps.fileType, margin, currentY, imgWidth, imgHeight);
-                    return currentY + imgHeight + 15;
-                } catch (e) {
-                    console.error("Error adding image:", e);
-                    showToast(`Failed to add an image.`, true);
-                    return currentY;
-                }
-            };
-
-            // Main Title
-            if (mainTitle) {
-                doc.setFontSize(22);
-                doc.setFont('helvetica', 'bold');
-                doc.text(mainTitle, pageWidth / 2, y, { align: 'center' });
-                y += 30;
-                doc.setFont('helvetica', 'normal');
-            }
-
-            // Main Image
-            const mainImageFile = document.getElementById('main-image-container').file;
-            if(mainImageFile) y = await addImageToPdf(mainImageFile, y);
-
-
-            const sections = Array.from(document.querySelectorAll('#sections-container .section'));
-            for (const section of sections) {
-                const imageFile = section.querySelector('.image-container').file;
-                const subheading = section.querySelector('.subheading-input').value.trim();
-                const content = section.querySelector('.content-textarea').value;
-
-                // Image
-                if (imageFile) y = await addImageToPdf(imageFile, y);
-
-                // Sub-heading
-                if (subheading) {
-                    if (y + 20 > pageHeight - margin) { doc.addPage(); y = margin; }
-                    doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(subheading, margin, y);
-                    y += 20;
-                    doc.setFont('helvetica', 'normal');
-                }
-
-                // Content
-                if (content) {
-                    doc.setFont('Courier', 'bold');
-                    doc.setFontSize(12);
-                    
-                    const TAB_SPACES = '    '; // 4 spaces for a tab
-                    const originalLines = content.split('\n');
-
-                    originalLines.forEach(originalLine => {
-                        const formattedLine = originalLine.replaceAll('\t', TAB_SPACES);
-                        const textLines = doc.splitTextToSize(formattedLine, pageWidth - (margin * 2));
-
-                        textLines.forEach(line => {
-                            const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
-                            if (y + lineHeight > pageHeight - margin) {
-                                doc.addPage();
-                                y = margin;
-                            }
-                            doc.text(line, margin, y);
-                            y += lineHeight;
-                        });
-                    });
-                    y += 15;
-                    doc.setFont('helvetica', 'normal');
-                }
-            }
-
-            // --- START: Add Page Numbers ---
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(10);
-                doc.text(
-                    `Page ${i} of ${pageCount}`,
-                    pageWidth / 2,
-                    pageHeight - margin / 2,
-                    { align: 'center' }
-                );
-            }
-            // --- END: Add Page Numbers ---
-
-            callback(doc, filename);
-        }
-
-        // --- UI Update Logic ---
-        function updateButtonText() {
+        // --- Settings & Core Action Handlers ---
+        const updateButtonText = () => {
             const action = actionSelect.value;
-            if (action === 'sendText' || action === 'sendPdf') {
+            if (action.includes("send")) {
                 buttonText.textContent = 'Send to Telegram';
-            } else if (action === 'downloadPdf') {
+            } else if (action.includes("downloadPdf")) {
                 buttonText.textContent = 'Download PDF';
-            } else if (action === 'downloadText') {
+            } else {
                 buttonText.textContent = 'Download Text';
             }
-        }
-        
-        // --- Settings Modal Logic ---
-        function openModal() {
+        };
+
+        const openSettingsModal = () => {
             webhookUrlInput.value = localStorage.getItem('webhookUrl') || '';
             settingsModal.classList.remove('hidden');
             setTimeout(() => {
                 settingsModal.classList.remove('opacity-0');
                 settingsModal.querySelector('.modal-content').classList.remove('scale-95');
             }, 10);
-        }
+        };
 
-        function closeModal() {
+        const closeSettingsModal = () => {
             settingsModal.classList.add('opacity-0');
             settingsModal.querySelector('.modal-content').classList.add('scale-95');
             setTimeout(() => settingsModal.classList.add('hidden'), 300);
-        }
+        };
 
-        function saveSettings() {
+        const saveSettings = () => {
             webhookUrl = webhookUrlInput.value.trim();
             localStorage.setItem('webhookUrl', webhookUrl);
-            showToast("Settings saved!");
-            closeModal();
-        }
-        
-        function loadSettings() {
+            showToast("Webhook URL saved!");
+            closeSettingsModal();
+        };
+
+        const loadSettings = () => {
             webhookUrl = localStorage.getItem('webhookUrl');
-            if (!webhookUrl) openModal();
-        }
+            if (!webhookUrl) openSettingsModal();
+            
+            document.getElementById('heading-font-select').value = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
+            document.getElementById('heading-font-size-select').value = localStorage.getItem('headingFontSize') || '26px';
+            document.getElementById('subheading-font-select').value = localStorage.getItem('subheadingFontFamily') || "'Inter', sans-serif";
+            document.getElementById('subheading-font-size-select').value = localStorage.getItem('subheadingFontSize') || '18px';
+            document.getElementById('paragraph-font-select').value = localStorage.getItem('paragraphFontFamily') || "'Fira Code', monospace";
+            document.getElementById('paragraph-font-size-select').value = localStorage.getItem('paragraphFontSize') || '14px';
+            tabSizeSelect.value = localStorage.getItem('tabSize') || '4';
+            
+            applyStyles();
+        };
         
-        // --- Core Action Handlers ---
-        function getCombinedText(forMarkdown = false) {
-            let combinedContent = "";
-            const mainTitle = headingInput.value.trim();
-            if (mainTitle) {
-                combinedContent += forMarkdown ? `*${mainTitle}*\n\n` : `${mainTitle}\n\n`;
-            }
-
-            const sections = document.querySelectorAll('#sections-container .section');
-            sections.forEach(section => {
-                const subheading = section.querySelector('.subheading-input').value.trim();
-                const content = section.querySelector('.content-textarea').value;
-                if (subheading) {
-                    combinedContent += forMarkdown ? `_${subheading}_\n` : `${subheading}\n`;
-                }
-                if (content) {
-                    combinedContent += `${content}\n\n`;
-                }
-            });
-            return combinedContent.trimEnd();
-        }
-
-        async function handleSendText() {
-            if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
-
+        const handleSendText = async () => {
+            if (!webhookUrl) { showToast("Webhook URL is missing.", true); return; }
             const heading = headingInput.value.trim();
-            const filename = heading ? `${heading}.txt` : 'document.txt';
             let content = "";
-
-            const sections = document.querySelectorAll('#sections-container .section');
-            sections.forEach(section => {
-                const subheading = section.querySelector('.subheading-input').value.trim();
-                const paragraph = section.querySelector('.content-textarea').value;
-                if (subheading) {
-                    content += `${subheading}\n`;
-                }
-                if (paragraph) {
-                    content += `${paragraph}\n\n`;
-                }
+            document.querySelectorAll('#sections-container .section').forEach(s => {
+                const sub = s.querySelector('.subheading-input').value.trim();
+                const para = s.querySelector('.content-textarea').value;
+                if(sub) content += `${sub}\n`;
+                if(para) content += `${para}\n\n`;
             });
             content = content.trimEnd();
-
-            if (!heading && !content) { 
-                showToast("Content is empty!", true); 
-                return; 
-            }
-            
+            if (!heading && !content) { showToast("Content is empty!", true); return; }
             setLoading(true);
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        heading: heading, 
-                        content: content,
-                        filename: filename
-                    })
+                    body: JSON.stringify({ heading, content, filename: `${heading || 'document'}.txt` })
                 });
-
                 if (response.ok) {
                     showToast("Message sent!");
-                    window.location.reload();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     showToast(`Error: ${errorData.message || response.status}`, true);
                 }
-            } catch (error) {
-                showToast("Failed to send. Check console.", true);
-                console.error("Send Error:", error);
+            } catch (e) {
+                showToast("Failed to send.", true); console.error(e);
             } finally {
                 setLoading(false);
             }
-        }
+        };
         
-        function handleDownloadPdf() {
+        const handlePdfAction = (actionType) => {
             const mainTitle = headingInput.value.trim();
-            const hasContent = !!document.querySelector('.content-textarea')?.value.trim();
+            const hasContent = sectionsContainer.querySelector('.content-textarea')?.value.trim();
             if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
-            
-            setLoading(true, "Generating...");
-            generatePdf((doc, filename) => {
-                doc.save(filename);
+            setLoading(true, { sendPdf: "Sending PDF...", downloadPdf: "Generating PDF..." }[actionType]);
+            generatePdf(async (doc, filename) => {
+                if (actionType === 'downloadPdf') {
+                    doc.save(filename);
+                    showToast("PDF downloaded!");
+                } else if (actionType === 'sendPdf') {
+                    if (!webhookUrl) { showToast("Webhook URL is missing.", true); setLoading(false); return; }
+                    const pdfBlob = doc.output('blob');
+                    const formData = new FormData();
+                    formData.append('document', pdfBlob, filename);
+                    if (mainTitle) formData.append('caption', mainTitle);
+                    try {
+                        const response = await fetch(webhookUrl, { method: 'POST', body: formData });
+                        if (response.ok) {
+                            showToast("PDF sent!");
+                        } else {
+                            const errorData = await response.json().catch(() => ({}));
+                            showToast(`Error: ${errorData.message || response.status}`, true);
+                        }
+                    } catch (e) {
+                        showToast("Failed to send.", true); console.error(e);
+                    }
+                }
                 setLoading(false);
             });
-        }
-        
-        function handleDownloadText() {
-            const textContent = getCombinedText(false); // Get plain text for the file
-            if (!textContent) {
-                showToast("Content is empty!", true);
-                return;
-            }
+        };
 
+        const handleDownloadText = () => {
+            let combinedContent = "";
             const mainTitle = headingInput.value.trim();
+            if (mainTitle) combinedContent += `${mainTitle}\n\n`;
+            document.querySelectorAll('#sections-container .section').forEach(s => {
+                const sub = s.querySelector('.subheading-input').value.trim();
+                const con = s.querySelector('.content-textarea').value;
+                if(sub) combinedContent += `${sub}\n`;
+                if(con) combinedContent += `${con}\n\n`;
+            });
+            const textContent = combinedContent.trimEnd();
+            if (!textContent) { showToast("Content is empty!", true); return; }
             const filename = (mainTitle || 'document') + '.txt';
-
             const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
@@ -436,86 +556,46 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            
             showToast("Text file downloaded!");
-        }
-
-        function handleSendPdf() {
-            if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
-
-            const mainTitle = headingInput.value.trim();
-            const hasContent = !!document.querySelector('.content-textarea')?.value.trim();
-            if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
-
-            setLoading(true, "Generating PDF...");
-            generatePdf(async (doc, filename) => {
-                setLoading(true, "Sending PDF...");
-                const pdfBlob = doc.output('blob');
-                const caption = headingInput.value.trim();
-                
-                const formData = new FormData();
-                formData.append('document', pdfBlob, filename);
-                if (caption) formData.append('caption', caption);
-
-                try {
-                    const response = await fetch(webhookUrl, { method: 'POST', body: formData });
-                    if (response.ok) {
-                        showToast("PDF sent to Telegram!");
-                        window.location.reload();
-                    } else {
-                        const errorData = await response.json().catch(() => ({}));
-                        showToast(`Error: ${errorData.message || response.status}`, true);
-                    }
-                } catch (error) {
-                    showToast("Failed to send. Check console.", true);
-                    console.error("Send PDF Error:", error);
-                } finally {
-                    setLoading(false);
-                }
-            });
-        }
-
+        };
+        
         // --- Event Listeners ---
         mainButton.addEventListener('click', () => {
             const action = actionSelect.value;
             if (action === 'sendText') handleSendText();
-            else if (action === 'sendPdf') handleSendPdf();
-            else if (action === 'downloadPdf') handleDownloadPdf();
+            else if (['sendPdf', 'downloadPdf'].includes(action)) handlePdfAction(action);
             else if (action === 'downloadText') handleDownloadText();
         });
 
         actionSelect.addEventListener('change', updateButtonText);
         addSectionButton.addEventListener('click', () => createNewSection(false));
-        settingsButton.addEventListener('click', openModal);
-        closeModalButton.addEventListener('click', closeModal);
+        clearContentButton.addEventListener('click', clearContent);
+        settingsButton.addEventListener('click', openSettingsModal);
+        closeModalButton.addEventListener('click', closeSettingsModal);
         saveSettingsButton.addEventListener('click', saveSettings);
         
-        // --- NEW: Paste Handler to convert tabs to spaces ---
-        sectionsContainer.addEventListener('paste', (e) => {
-            // Check if the paste event is happening on our target textarea
-            if (e.target.classList.contains('content-textarea')) {
-                // Get the text from the clipboard
-                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                
-                // Replace all tab characters with 4 spaces
-                const formattedText = pastedText.replaceAll('\t', '    ');
-
-                // Prevent the default paste action
-                e.preventDefault();
-                
-                // Get a reference to the textarea
-                const textarea = e.target;
-                
-                // Insert the modified text at the current cursor position
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-                
-                // Move the cursor to the end of the pasted content
-                textarea.selectionStart = textarea.selectionEnd = start + formattedText.length;
-            }
+        styleSelects.forEach(select => {
+            select.addEventListener('change', () => {
+                const keyMap = {
+                    'heading-font-select': 'headingFontFamily',
+                    'heading-font-size-select': 'headingFontSize',
+                    'subheading-font-select': 'subheadingFontFamily',
+                    'subheading-font-size-select': 'subheadingFontSize',
+                    'paragraph-font-select': 'paragraphFontFamily',
+                    'paragraph-font-size-select': 'paragraphFontSize',
+                    'tab-size-select': 'tabSize'
+                };
+                localStorage.setItem(keyMap[select.id], select.value);
+                applyStyles();
+            });
         });
 
+        headingInput.addEventListener('input', debouncedUpdatePreview);
+        sectionsContainer.addEventListener('input', (e) => {
+            if (e.target.matches('.subheading-input, .content-textarea')) {
+                debouncedUpdatePreview();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
@@ -524,4 +604,4 @@
         });
     </script>
 </body>
-                        </html>
+</html>
