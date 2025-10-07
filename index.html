@@ -248,34 +248,28 @@
 
                 // Content
                 if (content) {
-                    // --- START: New Corrected Code ---
                     doc.setFont('Courier', 'bold');
                     doc.setFontSize(12);
-
+                    
                     const TAB_SPACES = '    '; // 4 spaces for a tab
-                    const lines = content.split('\n');
-                    const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
+                    const originalLines = content.split('\n');
 
-                    lines.forEach(line => {
-                        // Replace tabs with spaces to ensure consistent rendering
-                        const processedLine = line.replaceAll('\t', TAB_SPACES);
+                    originalLines.forEach(originalLine => {
+                        const formattedLine = originalLine.replaceAll('\t', TAB_SPACES);
+                        const textLines = doc.splitTextToSize(formattedLine, pageWidth - (margin * 2));
 
-                        // Manually handle the text line by line to preserve all spaces
-                        const textLines = doc.splitTextToSize(processedLine, pageWidth - (margin * 2));
-                        
-                        textLines.forEach(wrappedLine => {
+                        textLines.forEach(line => {
+                            const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
                             if (y + lineHeight > pageHeight - margin) {
                                 doc.addPage();
                                 y = margin;
                             }
-                            // By passing the text line by line, we avoid whitespace collapse
-                            doc.text(wrappedLine, margin, y);
+                            doc.text(line, margin, y);
                             y += lineHeight;
                         });
                     });
                     y += 15;
                     doc.setFont('helvetica', 'normal');
-                    // --- END: New Corrected Code ---
                 }
             }
 
@@ -362,7 +356,6 @@
             if (!webhookUrl) { showToast("Webhook URL is missing. Click the gear icon.", true); return; }
 
             const heading = headingInput.value.trim();
-            const filename = heading ? `${heading}.txt` : 'document.txt';
             let content = "";
 
             const sections = document.querySelectorAll('#sections-container .section');
@@ -390,8 +383,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         heading: heading, 
-                        content: content,
-                        filename: filename
+                        content: content 
                     })
                 });
 
