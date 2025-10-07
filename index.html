@@ -265,6 +265,90 @@
                                 y = margin;
                             }
                             doc.text(line, margin, y);
+async function generatePdf(callback) {
+            const mainTitle = headingInput.value.trim();
+            const filename = (mainTitle || 'document') + '.pdf';
+            
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            let y = margin;
+
+            // Helper function to add image to PDF
+            const addImageToPdf = async (file, currentY) => {
+                const imgData = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                try {
+                    const imgProps = doc.getImageProperties(imgData);
+                    const imgWidth = pageWidth - (margin * 2);
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                    if (currentY + imgHeight > pageHeight - margin) { doc.addPage(); currentY = margin; }
+                    doc.addImage(imgData, imgProps.fileType, margin, currentY, imgWidth, imgHeight);
+                    return currentY + imgHeight + 15;
+                } catch (e) {
+                    console.error("Error adding image:", e);
+                    showToast(`Failed to add an image.`, true);
+                    return currentY;
+                }
+            };
+
+            // Main Title
+            if (mainTitle) {
+                doc.setFontSize(22);
+                doc.setFont('helvetica', 'bold');
+                doc.text(mainTitle, pageWidth / 2, y, { align: 'center' });
+                y += 30;
+                doc.setFont('helvetica', 'normal');
+            }
+
+            // Main Image
+            const mainImageFile = document.getElementById('main-image-container').file;
+            if(mainImageFile) y = await addImageToPdf(mainImageFile, y);
+
+
+            const sections = Array.from(document.querySelectorAll('#sections-container .section'));
+            for (const section of sections) {
+                const imageFile = section.querySelector('.image-container').file;
+                const subheading = section.querySelector('.subheading-input').value.trim();
+                const content = section.querySelector('.content-textarea').value;
+
+                // Image
+                if (imageFile) y = await addImageToPdf(imageFile, y);
+
+                // Sub-heading
+                if (subheading) {
+                    if (y + 20 > pageHeight - margin) { doc.addPage(); y = margin; }
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(subheading, margin, y);
+                    y += 20;
+                    doc.setFont('helvetica', 'normal');
+                }
+
+                // Content
+                if (content) {
+                    doc.setFont('Courier', 'bold');
+                    doc.setFontSize(12);
+                    
+                    const TAB_SPACES = '    '; // 4 spaces for a tab
+                    const originalLines = content.split('\n');
+
+                    originalLines.forEach(originalLine => {
+                        const formattedLine = originalLine.replaceAll('\t', TAB_SPACES);
+                        const textLines = doc.splitTextToSize(formattedLine, pageWidth - (margin * 2));
+
+                        textLines.forEach(line => {
+                            const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
+                            if (y + lineHeight > pageHeight - margin) {
+                                doc.addPage();
+                                y = margin;
+                            }
+                            doc.text(line, margin, y);
                             y += lineHeight;
                         });
                     });
