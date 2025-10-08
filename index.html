@@ -22,6 +22,19 @@
             tab-size: 4; /* Default */
             -moz-tab-size: 4; /* Firefox */
         }
+        #styling-menu {
+            transition: all 0.4s ease-in-out;
+            overflow: hidden;
+            max-height: 1000px; /* Set a large max-height for the expanded state */
+        }
+        #styling-menu.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-bottom: 0;
+            border-width: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -31,12 +44,18 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h1 class="text-2xl font-bold">Secure Sender</h1>
-                        <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        </button>
+                        <div class="flex items-center gap-1">
+                            <button id="toggle-styling-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Toggle Styles">
+                                <svg id="chevron-up" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                                <svg id="chevron-down" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <button id="settings-button" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" title="Settings">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="border-t border-b dark:border-gray-700 py-3 mb-4 space-y-4">
+                    <div id="styling-menu" class="border-t border-b dark:border-gray-700 py-3 mb-4 space-y-4">
                         <div class="p-2 border rounded-lg dark:border-gray-600">
                             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Heading Styles</label>
                             <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -98,7 +117,9 @@
                     <div class="space-y-4">
                         <input type="text" id="heading-input" class="w-full p-3 font-semibold bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Main Document Title">
                         <div id="main-image-container" class="image-container"></div>
-                        <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
+                        <div class="image-button-controls">
+                           <button type="button" onclick="addImage('main-image-container')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image Below Title</button>
+                        </div>
                         <div id="sections-container" class="space-y-4 max-h-[40vh] overflow-y-auto pr-2 pt-4 border-t dark:border-gray-700"></div>
                         <div class="flex items-center gap-2 mt-2">
                             <button id="add-section-button" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 dark:bg-gray-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -175,6 +196,10 @@
         const styleSelects = document.querySelectorAll('.style-select');
         const styleCheckboxes = document.querySelectorAll('.style-checkbox');
         const mainImageContainer = document.getElementById('main-image-container');
+        const stylingMenu = document.getElementById('styling-menu');
+        const toggleStylingButton = document.getElementById('toggle-styling-button');
+        const chevronUp = document.getElementById('chevron-up');
+        const chevronDown = document.getElementById('chevron-down');
         
         // Settings Modal Elements
         const settingsModal = document.getElementById('settings-modal');
@@ -414,7 +439,9 @@
             const removeButtonHTML = isFirst ? '' : `<button type="button" onclick="removeSection('${sectionId}')" class="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full hover:bg-red-600">&times;</button>`;
             sectionDiv.innerHTML = `
                 <div id="image-container-${sectionId}" class="image-container"></div>
-                <button type="button" onclick="addImage('image-container-${sectionId}')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image</button>
+                <div class="image-button-controls">
+                    <button type="button" onclick="addImage('image-container-${sectionId}')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Add Image</button>
+                </div>
                 <input type="text" class="subheading-input w-full p-2 font-medium text-gray-700 dark:text-gray-300 bg-transparent dark:bg-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Sub-heading (optional)">
                 <textarea class="content-textarea text-editor-textarea w-full h-32 p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Paragraph content..."></textarea>
                 ${removeButtonHTML}
@@ -422,17 +449,6 @@
             sectionsContainer.appendChild(sectionDiv);
             applyStyles();
             sectionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        };
-
-        const clearContent = () => {
-            headingInput.value = '';
-            mainImageContainer.innerHTML = '';
-            mainImageContainer.file = null;
-            document.querySelector('.add-image-button').textContent = 'Add Image Below Title';
-            sectionsContainer.innerHTML = '';
-            createNewSection(true);
-            showToast('Content cleared!');
-            updatePreview();
         };
 
         window.removeSection = (sectionId) => {
@@ -449,7 +465,7 @@
         window.addImage = (containerId) => {
             const imageContainer = document.getElementById(containerId);
             const parent = imageContainer.parentNode;
-            const addButton = parent.querySelector('.add-image-button');
+            const buttonControls = parent.querySelector('.image-button-controls');
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -460,14 +476,50 @@
                     const reader = new FileReader();
                     reader.onload = e => {
                         imageContainer.innerHTML = `<img src="${e.target.result}" class="image-preview mt-2 rounded-lg max-h-48 mx-auto" />`;
-                        addButton.textContent = 'Change Image';
                         imageContainer.file = file;
+
+                        buttonControls.innerHTML = `
+                           <div class="flex gap-2 mt-2">
+                               <button type="button" onclick="addImage('${containerId}')" class="w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">Change Image</button>
+                               <button type="button" onclick="removeImage('${containerId}')" class="w-full text-xs text-red-600 dark:text-red-400 hover:underline focus:outline-none">Remove Image</button>
+                           </div>
+                        `;
+
                         updatePreview();
                     };
                     reader.readAsDataURL(file);
                 }
             };
             input.click();
+        };
+
+        window.removeImage = (containerId) => {
+            const imageContainer = document.getElementById(containerId);
+            const parent = imageContainer.parentNode;
+            const buttonControls = parent.querySelector('.image-button-controls');
+            
+            imageContainer.innerHTML = '';
+            imageContainer.file = null;
+            
+            const buttonText = containerId === 'main-image-container' ? 'Add Image Below Title' : 'Add Image';
+            buttonControls.innerHTML = `<button type="button" onclick="addImage('${containerId}')" class="add-image-button w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none">${buttonText}</button>`;
+
+            updatePreview();
+        };
+        
+        const clearContent = () => {
+            headingInput.value = '';
+            removeImage('main-image-container');
+            sectionsContainer.innerHTML = '';
+            createNewSection(true);
+            showToast('Content cleared!');
+        };
+        
+        const toggleStylingMenu = () => {
+            const isCollapsed = stylingMenu.classList.toggle('collapsed');
+            chevronUp.classList.toggle('hidden', isCollapsed);
+            chevronDown.classList.toggle('hidden', !isCollapsed);
+            localStorage.setItem('stylingMenuCollapsed', isCollapsed ? 'true' : 'false');
         };
 
         // --- Settings & Core Action Handlers ---
@@ -568,7 +620,7 @@
         const handlePdfAction = (actionType) => {
             const mainTitle = headingInput.value.trim();
             const hasContent = sectionsContainer.querySelector('.content-textarea')?.value.trim();
-            if (!mainTitle && !hasContent) { showToast("Title or content is required for PDF.", true); return; }
+            if (!mainTitle && !hasContent && !mainImageContainer.file && !sectionsContainer.querySelector('.image-container')?.file) { showToast("Title or content is required for PDF.", true); return; }
             setLoading(true, { sendPdf: "Sending PDF...", downloadPdf: "Generating PDF..." }[actionType]);
             generatePdf(async (doc, filename) => {
                 if (actionType === 'downloadPdf') {
@@ -635,6 +687,7 @@
         settingsButton.addEventListener('click', openSettingsModal);
         closeModalButton.addEventListener('click', closeSettingsModal);
         saveSettingsButton.addEventListener('click', saveSettings);
+        toggleStylingButton.addEventListener('click', toggleStylingMenu);
         
         styleSelects.forEach(select => {
             select.addEventListener('change', () => {
@@ -674,6 +727,12 @@
             loadSettings();
             updateButtonText();
             createNewSection(true);
+            const isCollapsed = localStorage.getItem('stylingMenuCollapsed') !== 'false';
+            if (isCollapsed) {
+                stylingMenu.classList.add('collapsed');
+                chevronUp.classList.add('hidden');
+                chevronDown.classList.remove('hidden');
+            }
         });
     </script>
 </body>
