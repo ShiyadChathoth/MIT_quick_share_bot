@@ -255,20 +255,40 @@
 
                 const addImageToPdf = async (file, currentY) => {
                     if (!file) return currentY;
-                    const imgData = await new Promise(resolve => {
+                    const convertedImgData = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
-                        reader.onload = e => resolve(e.target.result);
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
+                                resolve(canvas.toDataURL('image/jpeg', 0.9));
+                            };
+                            img.onerror = () => reject(new Error("Image load error"));
+                            img.src = e.target.result;
+                        };
+                        reader.onerror = () => reject(new Error("FileReader error"));
                         reader.readAsDataURL(file);
+                    }).catch(err => {
+                        console.error("Failed to process image:", err);
+                        return null;
                     });
+
+                    if (!convertedImgData) return currentY;
+
                     try {
-                        const imgProps = doc.getImageProperties(imgData);
+                        const imgProps = doc.getImageProperties(convertedImgData);
                         const imgWidth = pageWidth - (margin * 2);
                         const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
                         if (currentY + imgHeight > pageHeight - margin) { doc.addPage(); currentY = margin; }
-                        doc.addImage(imgData, imgProps.fileType, margin, currentY, imgWidth, imgHeight);
+                        doc.addImage(convertedImgData, 'JPEG', margin, currentY, imgWidth, imgHeight);
                         return currentY + imgHeight + 15;
-                    } catch (e) { console.error("Error adding image:", e); return currentY; }
+                    } catch (e) { console.error("Error adding image to PDF:", e); return currentY; }
                 };
+
 
                 if (mainTitle) {
                     const font = localStorage.getItem('headingFontFamily') || "'Inter', sans-serif";
