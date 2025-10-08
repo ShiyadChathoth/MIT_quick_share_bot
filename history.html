@@ -143,8 +143,33 @@
         
         // Load saved credentials on page load
         document.addEventListener('DOMContentLoaded', () => {
-            botTokenInput.value = localStorage.getItem('telegramBotToken') || '';
-            chatIdInput.value = localStorage.getItem('telegramChatId') || '';
+            // -- Start of new code --
+            const webhookUrl = localStorage.getItem('webhookUrl');
+            if (webhookUrl) {
+                try {
+                    const url = new URL(webhookUrl);
+                    const botToken = url.searchParams.get('bot_token');
+                    const chatId = url.searchParams.get('chat_id');
+
+                    if (botToken) {
+                        botTokenInput.value = botToken;
+                    }
+                    if (chatId) {
+                        chatIdInput.value = chatId;
+                    }
+                } catch (error) {
+                    console.error('Could not parse webhook URL:', error);
+                }
+            }
+            // -- End of new code --
+
+            // Fallback to old credential storage method if new one fails
+            if (!botTokenInput.value) {
+                botTokenInput.value = localStorage.getItem('telegramBotToken') || '';
+            }
+            if (!chatIdInput.value) {
+                chatIdInput.value = localStorage.getItem('telegramChatId') || '';
+            }
         });
     </script>
 </body>
