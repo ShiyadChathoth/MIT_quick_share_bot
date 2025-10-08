@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sent Files History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div class="w-full max-w-4xl mx-auto p-4 lg:p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Sent Files History</h1>
+                <a href="./index.html" class="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 focus:outline-none">
+                    &larr; Back to Sender
+                </a>
+            </div>
+
+            <div class="space-y-4 p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div>
+                    <label for="bot-token" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telegram Bot Token</label>
+                    <input type="password" id="bot-token" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm" placeholder="Enter your bot token">
+                </div>
+                <div>
+                    <label for="chat-id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telegram Chat ID</label>
+                    <input type="text" id="chat-id" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm" placeholder="Enter your chat ID (e.g., -100123456789)">
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button id="fetch-history-button" class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Fetch Files
+                    </button>
+                </div>
+            </div>
+
+            <div id="history-container" class="mt-6 space-y-3">
+                </div>
+             <div id="loading-spinner" class="hidden text-center py-8">
+                <svg class="animate-spin h-8 w-8 text-indigo-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="mt-2 text-sm text-gray-500">Fetching history...</p>
+            </div>
+            <p id="no-files-message" class="hidden text-center py-8 text-gray-500">No files found in the recent history.</p>
+        </div>
+    </div>
+
+    <script>
+        const botTokenInput = document.getElementById('bot-token');
+        const chatIdInput = document.getElementById('chat-id');
+        const fetchHistoryButton = document.getElementById('fetch-history-button');
+        const historyContainer = document.getElementById('history-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const noFilesMessage = document.getElementById('no-files-message');
+
+        const fetchFileHistory = async () => {
+            const token = botTokenInput.value.trim();
+            const chatId = chatIdInput.value.trim();
+
+            if (!token || !chatId) {
+                alert('Please enter both your Bot Token and Chat ID.');
+                return;
+            }
+            
+            localStorage.setItem('telegramBotToken', token);
+            localStorage.setItem('telegramChatId', chatId);
+
+            historyContainer.innerHTML = '';
+            noFilesMessage.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            fetchHistoryButton.disabled = true;
+
+            try {
+                // Telegram's getUpdates method can be slow. We'll fetch updates and filter them.
+                const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates?limit=100`);
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                if (!data.ok || !data.result) {
+                    throw new Error('Failed to fetch updates from Telegram.');
+                }
+                
+                const files = [];
+                // The chat ID from the API is a number, so we parse our input
+                const numericChatId = parseInt(chatId, 10);
+
+                for (const update of data.result.reverse()) { // Reverse to show newest first
+                    const message = update.message || update.channel_post;
+                    if (message && message.chat.id === numericChatId && message.document) {
+                        files.push({
+                            file_name: message.document.file_name,
+                            file_id: message.document.file_id,
+                            date: new Date(message.date * 1000)
+                        });
+                    }
+                }
+
+                if (files.length === 0) {
+                    noFilesMessage.classList.remove('hidden');
+                } else {
+                    displayFiles(files, token);
+                }
+            } catch (error) {
+                console.error(error);
+                alert(`Failed to fetch history. Check your console for details.`);
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                fetchHistoryButton.disabled = false;
+            }
+        };
+        
+        const displayFiles = async (files, token) => {
+            for (const file of files) {
+                try {
+                    const pathResponse = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${file.file_id}`);
+                    const pathData = await pathResponse.json();
+                    if (pathData.ok) {
+                        const filePath = pathData.result.file_path;
+                        const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
+                        
+                        const fileElement = document.createElement('div');
+                        fileElement.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg';
+                        fileElement.innerHTML = `
+                            <div>
+                                <p class="font-semibold text-gray-800 dark:text-gray-200">${file.file_name}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${file.date.toLocaleString()}</p>
+                            </div>
+                            <a href="${downloadUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600">
+                                Download
+                            </a>
+                        `;
+                        historyContainer.appendChild(fileElement);
+                    }
+                } catch (e) {
+                    console.error('Could not get file path for', file.file_name, e);
+                }
+            }
+        };
+
+        fetchHistoryButton.addEventListener('click', fetchFileHistory);
+        
+        // Load saved credentials on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            botTokenInput.value = localStorage.getItem('telegramBotToken') || '';
+            chatIdInput.value = localStorage.getItem('telegramChatId') || '';
+        });
+    </script>
+</body>
+</html>
