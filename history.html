@@ -35,6 +35,16 @@
         const noFilesMessage = document.getElementById('no-files-message');
         let serverUrl = '';
 
+        // NEW HELPER FUNCTION: Convert bytes to readable format
+        const formatFileSize = (bytes, decimals = 2) => {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
         // Function to handle the deletion of a file
         const deleteFile = async (fileId) => {
             if (!confirm(`Are you sure you want to delete the file: ${fileId}? This cannot be undone from the server.`)) {
@@ -126,11 +136,16 @@
                 fileElement.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg';
 
                 const downloadUrl = `${baseUrl}/download/${encodeURIComponent(file.id)}`;
+                
+                // Formatted file size
+                const fileSizeFormatted = formatFileSize(file.size);
 
                 fileElement.innerHTML = `
                     <div>
                         <p class="font-semibold text-gray-800 dark:text-gray-200">${file.name}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Created: ${new Date(file.createdTime).toLocaleString()}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            ${fileSizeFormatted} &middot; Created: ${new Date(file.createdTime).toLocaleString()}
+                        </p>
                     </div>
                     <div class="flex space-x-2">
                         <a href="${downloadUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600 transition-colors">
