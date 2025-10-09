@@ -4,6 +4,35 @@
     const noFilesMessage = document.getElementById('no-files-message');
     let serverUrl = '';
 
+    // --- NEW DELETE FUNCTION ---
+    window.deleteFile = async (fileId) => {
+        if (!confirm(`Are you sure you want to permanently delete the file: ${fileId}? This cannot be undone.`)) {
+            return;
+        }
+        
+        // The server URL is like 'https://.../webhook', we need to remove '/webhook'
+        const baseUrl = serverUrl.replace('/webhook', '');
+        const deleteUrl = `${baseUrl}/delete/${fileId}`;
+
+        try {
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert(`File ${fileId} deleted successfully.`);
+                // Reload the file list to update the UI
+                fetchFileHistory();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                alert(`Failed to delete file: ${errorData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error during delete operation:', error);
+            alert('An error occurred while communicating with the server.');
+        }
+    };
+
     const fetchFileHistory = async () => {
         if (!serverUrl) {
             alert('Webhook URL is not set. Please save your full webhook URL in the main page settings.');
@@ -46,6 +75,7 @@
 
             const downloadUrl = `${baseUrl}/download/${file.id}`;
 
+            // --- MODIFIED HTML to include Delete Button ---
             fileElement.innerHTML = `
                 <div>
                     <p class="font-semibold text-gray-800 dark:text-gray-200">${file.name}</p>
@@ -60,36 +90,8 @@
                     </button>
                 </div>
             `;
+            // ----------------------------------------------
             historyContainer.appendChild(fileElement);
-        }
-    };
-
-    // --- NEW DELETE FUNCTION ---
-    window.deleteFile = async (fileId) => {
-        if (!confirm(`Are you sure you want to permanently delete the file: ${fileId}? This cannot be undone.`)) {
-            return;
-        }
-        
-        // The server URL is like 'https://.../webhook', we need to remove '/webhook'
-        const baseUrl = serverUrl.replace('/webhook', '');
-        const deleteUrl = `${baseUrl}/delete/${fileId}`;
-
-        try {
-            const response = await fetch(deleteUrl, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
-                alert(`File ${fileId} deleted successfully.`);
-                // Reload the file list to update the UI
-                fetchFileHistory();
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                alert(`Failed to delete file: ${errorData.message || response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Error during delete operation:', error);
-            alert('An error occurred while communicating with the server.');
         }
     };
 
